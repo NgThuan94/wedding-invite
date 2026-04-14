@@ -8,10 +8,8 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,16 +20,18 @@ export default function SignUpPage() {
 
   if (state?.message) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-5 py-10 text-center">
-          <CheckCircle2 className="h-12 w-12 text-green-500" />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">Kiểm tra email của bạn</p>
-            <p className="text-sm text-muted-foreground">{state.message}</p>
+      <Card className="border-border shadow-warm-sm">
+        <CardContent className="flex flex-col items-center gap-5 py-12 px-8 text-center">
+          <CheckCircle2 className="h-12 w-12 text-[#8B9D83]" />
+          <div className="flex flex-col gap-1.5">
+            <h2 className="text-xl font-serif font-medium text-foreground">
+              Kiểm tra email của bạn
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">{state.message}</p>
           </div>
           <Link
             href="/sign-in"
-            className="text-sm underline underline-offset-4 hover:text-muted-foreground"
+            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
           >
             Đã xác thực? Đăng nhập
           </Link>
@@ -41,13 +41,13 @@ export default function SignUpPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Đăng ký</CardTitle>
-        <CardDescription>Tạo tài khoản mới để bắt đầu</CardDescription>
+    <Card className="border-border shadow-warm-sm">
+      <CardHeader className="pb-4 pt-8 px-8">
+        <h1 className="text-3xl font-serif font-medium text-foreground">Đăng ký</h1>
+        <p className="text-sm text-muted-foreground mt-1">Tạo tài khoản mới để bắt đầu</p>
       </CardHeader>
-      <CardContent>
-        <form action={action} className="flex flex-col gap-4">
+      <CardContent className="px-8">
+        <form action={action} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -76,14 +76,10 @@ export default function SignUpPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -97,12 +93,12 @@ export default function SignUpPage() {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center px-8 pb-8">
         <p className="text-sm text-muted-foreground">
           Đã có tài khoản?{' '}
           <Link
             href="/sign-in"
-            className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+            className="text-foreground underline underline-offset-4 hover:text-accent transition-colors"
           >
             Đăng nhập
           </Link>

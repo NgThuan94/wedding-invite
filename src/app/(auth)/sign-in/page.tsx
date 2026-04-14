@@ -8,10 +8,8 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,13 +19,13 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Đăng nhập</CardTitle>
-        <CardDescription>Nhập thông tin tài khoản của bạn</CardDescription>
+    <Card className="border-border shadow-warm-sm">
+      <CardHeader className="pb-4 pt-8 px-8">
+        <h1 className="text-3xl font-serif font-medium text-foreground">Đăng nhập</h1>
+        <p className="text-sm text-muted-foreground mt-1">Nhập thông tin tài khoản của bạn</p>
       </CardHeader>
-      <CardContent>
-        <form action={action} className="flex flex-col gap-4">
+      <CardContent className="px-8">
+        <form action={action} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -55,14 +53,10 @@ export default function SignInPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -73,7 +67,7 @@ export default function SignInPage() {
               {state.unconfirmed && (
                 <Link
                   href="/sign-up"
-                  className="text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground"
+                  className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
                 >
                   Đăng ký lại để nhận email mới →
                 </Link>
@@ -86,12 +80,12 @@ export default function SignInPage() {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center px-8 pb-8">
         <p className="text-sm text-muted-foreground">
           Chưa có tài khoản?{' '}
           <Link
             href="/sign-up"
-            className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+            className="text-foreground underline underline-offset-4 hover:text-accent transition-colors"
           >
             Đăng ký
           </Link>

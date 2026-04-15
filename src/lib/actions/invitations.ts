@@ -85,3 +85,233 @@ export async function deleteInvitation(invitationId: string): Promise<Invitation
   revalidatePath('/dashboard')
   return null
 }
+
+// ---------------------------------------------------------------------------
+// Editor types
+// ---------------------------------------------------------------------------
+
+export type BasicInfoPayload = {
+  bride_name: string | null
+  groom_name: string | null
+  bride_full_name: string | null
+  groom_full_name: string | null
+  wedding_date: string | null
+  wedding_time: string | null
+  hashtag: string | null
+  venue_name: string | null
+  venue_address: string | null
+  venue_map_url: string | null
+  dress_code: string | null
+  story: string | null
+  live_stream_url: string | null
+}
+
+export type TimelineItemPayload = {
+  title: string
+  event_date: string | null
+  description: string | null
+  display_order: number
+}
+
+export type PartyMemberPayload = {
+  name: string
+  role: string | null
+  description: string | null
+  display_order: number
+}
+
+// ---------------------------------------------------------------------------
+// updateInvitationBasicInfo — auto-save flat fields
+// ---------------------------------------------------------------------------
+
+export async function updateInvitationBasicInfo(
+  id: string,
+  data: BasicInfoPayload
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  const { error } = await supabase
+    .from('invitations')
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+  return {}
+}
+
+// ---------------------------------------------------------------------------
+// checkSlugAvailability — read-only uniqueness check
+// ---------------------------------------------------------------------------
+
+export async function checkSlugAvailability(
+  invitationId: string,
+  slug: string
+): Promise<{ available: boolean; error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { available: false, error: 'Chưa đăng nhập' }
+
+  const { count, error } = await supabase
+    .from('invitations')
+    .select('id', { count: 'exact', head: true })
+    .eq('slug', slug)
+    .neq('id', invitationId)
+
+  if (error) return { available: false, error: 'Không thể kiểm tra slug.' }
+  return { available: count === 0 }
+}
+
+// ---------------------------------------------------------------------------
+// updateInvitationSlug — with re-check + ownership guard
+// ---------------------------------------------------------------------------
+
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/
+
+export async function updateInvitationSlug(
+  id: string,
+  newSlug: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  if (!SLUG_REGEX.test(newSlug)) {
+    return { error: 'Slug không hợp lệ' }
+  }
+
+  // Re-check uniqueness (race condition guard)
+  const { count } = await supabase
+    .from('invitations')
+    .select('id', { count: 'exact', head: true })
+    .eq('slug', newSlug)
+    .neq('id', id)
+
+  if (count && count > 0) {
+    return { error: 'Slug này vừa được người khác dùng. Hãy chọn slug khác.' }
+  }
+
+  const { error } = await supabase
+    .from('invitations')
+    .update({ slug: newSlug, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+  return {}
+}
+
+// ---------------------------------------------------------------------------
+// saveLoveTimeline — replace-all (delete + insert batch)
+// ---------------------------------------------------------------------------
+
+export async function saveLoveTimeline(
+  invitationId: string,
+  items: TimelineItemPayload[]
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  // Check ownership
+  const { data: inv } = await supabase
+    .from('invitations')
+    .select('id')
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!inv) return { error: 'Không có quyền chỉnh sửa.' }
+
+  const { error: deleteError } = await supabase
+    .from('love_timeline')
+    .delete()
+    .eq('invitation_id', invitationId)
+
+  if (deleteError) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+
+  if (items.length > 0) {
+    const { error: insertError } = await supabase
+      .from('love_timeline')
+      .insert(
+        items.map((item, idx) => ({
+          invitation_id: invitationId,
+          title: item.title,
+          event_date: item.event_date,
+          description: item.description,
+          display_order: idx,
+        }))
+      )
+
+    if (insertError) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+  }
+
+  revalidatePath(`/invitations/${invitationId}/edit`)
+  return {}
+}
+
+// ---------------------------------------------------------------------------
+// saveWeddingParty — replace-all (delete + insert batch)
+// ---------------------------------------------------------------------------
+
+export async function saveWeddingParty(
+  invitationId: string,
+  members: PartyMemberPayload[]
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  // Check ownership
+  const { data: inv } = await supabase
+    .from('invitations')
+    .select('id')
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!inv) return { error: 'Không có quyền chỉnh sửa.' }
+
+  const { error: deleteError } = await supabase
+    .from('wedding_party')
+    .delete()
+    .eq('invitation_id', invitationId)
+
+  if (deleteError) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+
+  if (members.length > 0) {
+    const { error: insertError } = await supabase
+      .from('wedding_party')
+      .insert(
+        members.map((m, idx) => ({
+          invitation_id: invitationId,
+          name: m.name,
+          role: m.role,
+          description: m.description,
+          display_order: idx,
+        }))
+      )
+
+    if (insertError) return { error: 'Không thể lưu. Vui lòng thử lại.' }
+  }
+
+  revalidatePath(`/invitations/${invitationId}/edit`)
+  return {}
+}

@@ -4,20 +4,37 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ImageUploadZone } from '@/components/image-upload-zone'
+import { GalleryManager } from '@/components/gallery-manager'
+import { updateCoverPhoto } from '@/lib/actions/invitations'
 import { cn } from '@/lib/utils'
 import type { FlatFields } from './editor-shell'
 
 interface SectionBasicInfoProps {
   fields: FlatFields
   onChange: (patch: Partial<FlatFields>) => void
+  invitationId: string
+  userId: string
+  coverPhotoUrl: string | null
+  galleryImages: string[]
+  uploadFile: (file: File, type: 'cover') => Promise<string>
 }
 
-export function SectionBasicInfo({ fields, onChange }: SectionBasicInfoProps) {
+export function SectionBasicInfo({
+  fields,
+  onChange,
+  invitationId,
+  userId,
+  coverPhotoUrl,
+  galleryImages,
+  uploadFile,
+}: SectionBasicInfoProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
 
   // Convert storage string "yyyy-MM-dd" to Date, with timezone guard
@@ -141,6 +158,30 @@ export function SectionBasicInfo({ fields, onChange }: SectionBasicInfoProps) {
           onChange={(e) => onChange({ hashtag: e.target.value })}
         />
       </div>
+
+      {/* Cover photo */}
+      <ImageUploadZone
+        label="Ảnh cover"
+        aspectRatio="16/9"
+        currentUrl={coverPhotoUrl}
+        onUpload={async (file) => {
+          const url = await uploadFile(file, 'cover')
+          const result = await updateCoverPhoto(invitationId, url)
+          if (result.error) toast.error(result.error)
+          return url
+        }}
+        onRemove={async () => {
+          const result = await updateCoverPhoto(invitationId, null)
+          if (result.error) toast.error(result.error)
+        }}
+      />
+
+      {/* Gallery */}
+      <GalleryManager
+        invitationId={invitationId}
+        userId={userId}
+        initialUrls={galleryImages}
+      />
     </div>
   )
 }

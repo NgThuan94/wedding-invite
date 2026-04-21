@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { ImageUploadZone } from '@/components/image-upload-zone'
 import { saveLoveTimeline } from '@/lib/actions/invitations'
 import type { Tables } from '@/types/database'
 
@@ -19,6 +20,7 @@ type LocalItem = {
   title: string
   event_date: string
   description: string
+  photo_url: string | null
 }
 
 function dbItemToLocal(item: Tables<'love_timeline'>): LocalItem {
@@ -27,6 +29,7 @@ function dbItemToLocal(item: Tables<'love_timeline'>): LocalItem {
     title: item.title,
     event_date: item.event_date ?? '',
     description: item.description ?? '',
+    photo_url: item.photo_url ?? null,
   }
 }
 
@@ -36,6 +39,7 @@ function createEmptyItem(): LocalItem {
     title: '',
     event_date: '',
     description: '',
+    photo_url: null,
   }
 }
 
@@ -54,6 +58,7 @@ interface SectionTimelineProps {
   invitationId: string
   initialItems: Tables<'love_timeline'>[]
   onDirtyChange: (dirty: boolean) => void
+  uploadFile: (file: File, type: 'timeline') => Promise<string>
 }
 
 // ---------------------------------------------------------------------------
@@ -64,6 +69,7 @@ export function SectionTimeline({
   invitationId,
   initialItems,
   onDirtyChange,
+  uploadFile,
 }: SectionTimelineProps) {
   const [items, setItems] = useState<LocalItem[]>(() =>
     initialItems.map(dbItemToLocal)
@@ -117,6 +123,7 @@ export function SectionTimeline({
           title: item.title.trim() || '(Chưa đặt tên)',
           event_date: item.event_date || null,
           description: item.description.trim() || null,
+          photo_url: item.photo_url,
           display_order: idx,
         }))
       )
@@ -222,6 +229,17 @@ export function SectionTimeline({
                 }
               />
             </div>
+            <ImageUploadZone
+              label="Ảnh (tuỳ chọn)"
+              aspectRatio="4/3"
+              currentUrl={item.photo_url}
+              onUpload={async (file) => {
+                const url = await uploadFile(file, 'timeline')
+                updateItem(item._key, { photo_url: url })
+                return url
+              }}
+              onRemove={() => updateItem(item._key, { photo_url: null })}
+            />
           </div>
         </div>
       ))}

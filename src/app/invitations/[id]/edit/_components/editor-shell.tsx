@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useAutoSave } from '@/lib/hooks/use-autosave'
+import { useStorageUpload } from '@/lib/hooks/use-storage-upload'
 import { updateInvitationBasicInfo } from '@/lib/actions/invitations'
 import type { Tables } from '@/types/database'
 import { SaveIndicator } from './save-indicator'
@@ -84,6 +85,10 @@ interface EditorShellProps {
 
 export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
   const router = useRouter()
+  const { uploadFile } = useStorageUpload({
+    userId: invitation.user_id,
+    invitationId: invitation.id,
+  })
   const [flatFields, setFlatFields] = useState<FlatFields>(() =>
     initFlatFields(invitation)
   )
@@ -184,7 +189,19 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
               Thông tin cơ bản
             </AccordionTrigger>
             <AccordionContent>
-              <SectionBasicInfo fields={flatFields} onChange={handleFieldChange} />
+              <SectionBasicInfo
+                fields={flatFields}
+                onChange={handleFieldChange}
+                invitationId={invitation.id}
+                userId={invitation.user_id}
+                coverPhotoUrl={invitation.cover_photo_url ?? null}
+                galleryImages={
+                  Array.isArray(invitation.gallery_images)
+                    ? (invitation.gallery_images as string[])
+                    : []
+                }
+                uploadFile={(file) => uploadFile(file, 'cover')}
+              />
             </AccordionContent>
           </AccordionItem>
 
@@ -215,6 +232,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
                 invitationId={invitation.id}
                 initialItems={timeline}
                 onDirtyChange={setTimelineDirty}
+                uploadFile={(file) => uploadFile(file, 'timeline')}
               />
             </AccordionContent>
           </AccordionItem>
@@ -228,6 +246,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
                 invitationId={invitation.id}
                 initialMembers={party}
                 onDirtyChange={setPartyDirty}
+                uploadFile={(file) => uploadFile(file, 'party')}
               />
             </AccordionContent>
           </AccordionItem>

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { ImageUploadZone } from '@/components/image-upload-zone'
 import { saveWeddingParty } from '@/lib/actions/invitations'
 import type { Tables } from '@/types/database'
 
@@ -19,6 +20,7 @@ type LocalMember = {
   name: string
   role: string
   description: string
+  photo_url: string | null
 }
 
 function dbMemberToLocal(m: Tables<'wedding_party'>): LocalMember {
@@ -27,6 +29,7 @@ function dbMemberToLocal(m: Tables<'wedding_party'>): LocalMember {
     name: m.name,
     role: m.role ?? '',
     description: m.description ?? '',
+    photo_url: m.photo_url ?? null,
   }
 }
 
@@ -36,6 +39,7 @@ function createEmptyMember(): LocalMember {
     name: '',
     role: '',
     description: '',
+    photo_url: null,
   }
 }
 
@@ -54,6 +58,7 @@ interface SectionPartyProps {
   invitationId: string
   initialMembers: Tables<'wedding_party'>[]
   onDirtyChange: (dirty: boolean) => void
+  uploadFile: (file: File, type: 'party') => Promise<string>
 }
 
 // ---------------------------------------------------------------------------
@@ -64,6 +69,7 @@ export function SectionParty({
   invitationId,
   initialMembers,
   onDirtyChange,
+  uploadFile,
 }: SectionPartyProps) {
   const [members, setMembers] = useState<LocalMember[]>(() =>
     initialMembers.map(dbMemberToLocal)
@@ -116,6 +122,7 @@ export function SectionParty({
           name: m.name.trim() || '(Chưa đặt tên)',
           role: m.role.trim() || null,
           description: m.description.trim() || null,
+          photo_url: m.photo_url,
           display_order: idx,
         }))
       )
@@ -181,45 +188,58 @@ export function SectionParty({
             </div>
           </div>
 
-          {/* Fields */}
-          <div className="grid gap-3">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-1.5">
-                <Label htmlFor={`party-name-${member._key}`}>Tên</Label>
-                <Input
-                  id={`party-name-${member._key}`}
-                  value={member.name}
-                  placeholder="Nguyễn Văn A"
-                  onChange={(e) => updateMember(member._key, { name: e.target.value })}
-                />
+          {/* Fields: photo + text side-by-side on sm+ */}
+          <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
+            <ImageUploadZone
+              label="Ảnh"
+              aspectRatio="1/1"
+              currentUrl={member.photo_url}
+              onUpload={async (file) => {
+                const url = await uploadFile(file, 'party')
+                updateMember(member._key, { photo_url: url })
+                return url
+              }}
+              onRemove={() => updateMember(member._key, { photo_url: null })}
+            />
+            <div className="grid gap-3 content-start">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1.5">
+                  <Label htmlFor={`party-name-${member._key}`}>Tên</Label>
+                  <Input
+                    id={`party-name-${member._key}`}
+                    value={member.name}
+                    placeholder="Nguyễn Văn A"
+                    onChange={(e) => updateMember(member._key, { name: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor={`party-role-${member._key}`}>
+                    Vai trò{' '}
+                    <span className="text-muted-foreground font-normal">(tuỳ chọn)</span>
+                  </Label>
+                  <Input
+                    id={`party-role-${member._key}`}
+                    value={member.role}
+                    placeholder="Phù rể, Phù dâu..."
+                    onChange={(e) => updateMember(member._key, { role: e.target.value })}
+                  />
+                </div>
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor={`party-role-${member._key}`}>
-                  Vai trò{' '}
+                <Label htmlFor={`party-desc-${member._key}`}>
+                  Mô tả{' '}
                   <span className="text-muted-foreground font-normal">(tuỳ chọn)</span>
                 </Label>
-                <Input
-                  id={`party-role-${member._key}`}
-                  value={member.role}
-                  placeholder="Phù rể, Phù dâu..."
-                  onChange={(e) => updateMember(member._key, { role: e.target.value })}
+                <Textarea
+                  id={`party-desc-${member._key}`}
+                  value={member.description}
+                  placeholder="Vài dòng giới thiệu..."
+                  rows={2}
+                  onChange={(e) =>
+                    updateMember(member._key, { description: e.target.value })
+                  }
                 />
               </div>
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor={`party-desc-${member._key}`}>
-                Mô tả{' '}
-                <span className="text-muted-foreground font-normal">(tuỳ chọn)</span>
-              </Label>
-              <Textarea
-                id={`party-desc-${member._key}`}
-                value={member.description}
-                placeholder="Vài dòng giới thiệu..."
-                rows={2}
-                onChange={(e) =>
-                  updateMember(member._key, { description: e.target.value })
-                }
-              />
             </div>
           </div>
         </div>

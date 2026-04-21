@@ -87,6 +87,59 @@ export async function deleteInvitation(invitationId: string): Promise<Invitation
 }
 
 // ---------------------------------------------------------------------------
+// updateCoverPhoto
+// ---------------------------------------------------------------------------
+
+export async function updateCoverPhoto(
+  invitationId: string,
+  photoUrl: string | null
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  const { error } = await supabase
+    .from('invitations')
+    .update({ cover_photo_url: photoUrl, updated_at: new Date().toISOString() })
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Không thể lưu ảnh cover. Vui lòng thử lại.' }
+  revalidatePath(`/invitations/${invitationId}/edit`)
+  return {}
+}
+
+// ---------------------------------------------------------------------------
+// updateGalleryImages
+// ---------------------------------------------------------------------------
+
+export async function updateGalleryImages(
+  invitationId: string,
+  urls: string[]
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+  if (urls.length > 10) return { error: 'Tối đa 10 ảnh trong thư viện.' }
+
+  const { error } = await supabase
+    .from('invitations')
+    .update({ gallery_images: urls, updated_at: new Date().toISOString() })
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Không thể lưu thư viện ảnh. Vui lòng thử lại.' }
+  revalidatePath(`/invitations/${invitationId}/edit`)
+  return {}
+}
+
+// ---------------------------------------------------------------------------
 // Editor types
 // ---------------------------------------------------------------------------
 
@@ -110,6 +163,7 @@ export type TimelineItemPayload = {
   title: string
   event_date: string | null
   description: string | null
+  photo_url: string | null
   display_order: number
 }
 
@@ -117,6 +171,7 @@ export type PartyMemberPayload = {
   name: string
   role: string | null
   description: string | null
+  photo_url: string | null
   display_order: number
 }
 
@@ -253,6 +308,7 @@ export async function saveLoveTimeline(
           title: item.title,
           event_date: item.event_date,
           description: item.description,
+          photo_url: item.photo_url,
           display_order: idx,
         }))
       )
@@ -305,6 +361,7 @@ export async function saveWeddingParty(
           name: m.name,
           role: m.role,
           description: m.description,
+          photo_url: m.photo_url,
           display_order: idx,
         }))
       )

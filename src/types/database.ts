@@ -81,6 +81,10 @@ export type Database = {
           hashtag: string | null
           id: string
           live_stream_url: string | null
+          music_autoplay: boolean | null
+          music_enabled: boolean | null
+          music_platform: string | null
+          music_url: string | null
           published_at: string | null
           slug: string
           status: string
@@ -111,6 +115,10 @@ export type Database = {
           hashtag?: string | null
           id?: string
           live_stream_url?: string | null
+          music_autoplay?: boolean | null
+          music_enabled?: boolean | null
+          music_platform?: string | null
+          music_url?: string | null
           published_at?: string | null
           slug: string
           status?: string
@@ -141,6 +149,10 @@ export type Database = {
           hashtag?: string | null
           id?: string
           live_stream_url?: string | null
+          music_autoplay?: boolean | null
+          music_enabled?: boolean | null
+          music_platform?: string | null
+          music_url?: string | null
           published_at?: string | null
           slug?: string
           status?: string

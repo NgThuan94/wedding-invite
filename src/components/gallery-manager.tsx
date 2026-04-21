@@ -212,7 +212,7 @@ export function GalleryManager({ invitationId, userId, initialUrls }: GalleryMan
           </span>
         </span>
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext id="gallery-dnd" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={urls} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {urls.map((url) => (

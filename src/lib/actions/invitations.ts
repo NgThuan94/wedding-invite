@@ -157,6 +157,10 @@ export type BasicInfoPayload = {
   dress_code: string | null
   story: string | null
   live_stream_url: string | null
+  music_enabled: boolean | null
+  music_platform: string | null
+  music_url: string | null
+  music_autoplay: boolean | null
 }
 
 export type TimelineItemPayload = {
@@ -190,9 +194,21 @@ export async function updateInvitationBasicInfo(
 
   if (!user) return { error: 'Chưa đăng nhập' }
 
+  // Split music fields out — they require a separate migration (0002).
+  // Only include them when at least one music field is non-default so that
+  // the save still works even if the migration hasn't been run yet.
+  const { music_enabled, music_platform, music_url, music_autoplay, ...baseData } = data
+
+  const musicFieldsChanged =
+    music_enabled !== false || music_platform !== null || music_url !== null
+
+  const payload = musicFieldsChanged
+    ? { ...baseData, music_enabled, music_platform, music_url, music_autoplay, updated_at: new Date().toISOString() }
+    : { ...baseData, updated_at: new Date().toISOString() }
+
   const { error } = await supabase
     .from('invitations')
-    .update({ ...data, updated_at: new Date().toISOString() })
+    .update(payload)
     .eq('id', id)
     .eq('user_id', user.id)
 
@@ -371,4 +387,63 @@ export async function saveWeddingParty(
 
   revalidatePath(`/invitations/${invitationId}/edit`)
   return {}
+}
+
+// ---------------------------------------------------------------------------
+// publishInvitation — validate required fields, set status = published
+// ---------------------------------------------------------------------------
+
+export type PublishResult =
+  | { success: true; slug: string }
+  | { error: string }
+
+export async function publishInvitation(invitationId: string): Promise<PublishResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Chưa đăng nhập' }
+
+  const { data: inv } = await supabase
+    .from('invitations')
+    .select('cover_photo_url, bride_name, groom_name, wedding_date, venue_name, slug, status')
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!inv) return { error: 'Không tìm thấy thiệp.' }
+
+  if (inv.status === 'published') {
+    return { success: true, slug: inv.slug }
+  }
+
+  const missing: string[] = []
+  if (!inv.cover_photo_url) missing.push('ảnh bìa')
+  if (!inv.bride_name) missing.push('tên cô dâu')
+  if (!inv.groom_name) missing.push('tên chú rể')
+  if (!inv.wedding_date) missing.push('ngày cưới')
+  if (!inv.venue_name) missing.push('địa điểm')
+
+  if (missing.length > 0) {
+    return { error: `Vui lòng điền đầy đủ: ${missing.join(', ')}.` }
+  }
+
+  const { error } = await supabase
+    .from('invitations')
+    .update({
+      status: 'published',
+      published_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', invitationId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Không thể xuất bản. Vui lòng thử lại.' }
+
+  revalidatePath('/dashboard')
+  revalidatePath(`/invitations/${invitationId}/edit`)
+  revalidatePath(`/i/${inv.slug}`)
+
+  return { success: true, slug: inv.slug }
 }

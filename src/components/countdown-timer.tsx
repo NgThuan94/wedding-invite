@@ -34,16 +34,19 @@ function calcTimeLeft(targetDate: string): TimeLeft {
 }
 
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calcTimeLeft(targetDate))
+  const [mounted, setMounted] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: false })
 
   useEffect(() => {
+    setMounted(true)
+    setTimeLeft(calcTimeLeft(targetDate))
     const id = setInterval(() => {
       setTimeLeft(calcTimeLeft(targetDate))
     }, 1000)
     return () => clearInterval(id)
   }, [targetDate])
 
-  if (timeLeft.isPast) return null
+  if (!mounted || timeLeft.isPast) return null
 
   const units = [
     { value: timeLeft.days, label: 'Ngày' },

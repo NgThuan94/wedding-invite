@@ -54,6 +54,7 @@ export type FlatFields = {
   music_platform: string
   music_url: string
   music_autoplay: boolean
+  template_style: string
 }
 
 function initFlatFields(inv: Tables<'invitations'>): FlatFields {
@@ -75,6 +76,7 @@ function initFlatFields(inv: Tables<'invitations'>): FlatFields {
     music_platform: inv.music_platform ?? '',
     music_url: inv.music_url ?? '',
     music_autoplay: inv.music_autoplay ?? true,
+    template_style: inv.template_style ?? 'elegant',
   }
 }
 
@@ -130,6 +132,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         music_platform: fields.music_platform || null,
         music_url: fields.music_url || null,
         music_autoplay: fields.music_autoplay,
+        template_style: fields.template_style || 'elegant',
       })
       if (result.error) {
         toast.error('Không thể lưu, thử lại', { description: result.error })

@@ -3,7 +3,7 @@
 import { useTransition, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Pencil, Eye, Trash2 } from 'lucide-react'
+import { Pencil, Eye, Trash2, UsersIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { deleteInvitation } from '@/lib/actions/invitations'
 import { GradientPlaceholder } from '@/components/gradient-placeholder'
@@ -23,7 +23,7 @@ import type { Tables } from '@/types/database'
 
 type Invitation = Pick<
   Tables<'invitations'>,
-  'id' | 'slug' | 'bride_name' | 'groom_name' | 'wedding_date' | 'status' | 'tier' | 'cover_photo_url'
+  'id' | 'slug' | 'bride_name' | 'groom_name' | 'wedding_date' | 'status' | 'tier' | 'cover_photo_url' | 'rsvp_count'
 >
 
 interface InvitationCardProps {
@@ -56,7 +56,7 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-warm-md">
-      {/* Cover — portrait ratio giống thiệp thật */}
+      {/* Cover */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
         {invitation.cover_photo_url ? (
           <Image
@@ -81,6 +81,16 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
             {isPublished ? 'Đã xuất bản' : 'Bản nháp'}
           </span>
         </div>
+
+        {/* RSVP count badge */}
+        {invitation.rsvp_count > 0 && (
+          <div className="absolute top-3 right-3">
+            <span className="inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              <UsersIcon className="h-3 w-3" />
+              {invitation.rsvp_count}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -103,6 +113,16 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
             <Pencil className="h-3.5 w-3.5" />
             Chỉnh sửa
           </Link>
+
+          {isPublished && (
+            <Link
+              href={`/dashboard/rsvps/${invitation.id}`}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors hover:bg-muted hover:border-accent/40"
+            >
+              <UsersIcon className="h-3.5 w-3.5" />
+              RSVP
+            </Link>
+          )}
 
           {isPublished && (
             <Link

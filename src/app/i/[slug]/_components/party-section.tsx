@@ -1,17 +1,28 @@
-import Image from 'next/image';
-import type { Tables } from '@/types/database';
+'use client'
+
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { useScrollReveal } from '@/lib/hooks/use-scroll-reveal'
+import type { Tables } from '@/types/database'
 
 interface PartySectionProps {
-  members: Tables<'wedding_party'>[];
+  members: Tables<'wedding_party'>[]
 }
 
 export function PartySection({ members }: PartySectionProps) {
-  if (members.length === 0) return null;
+  const { ref, inView } = useScrollReveal(0.1)
+
+  if (members.length === 0) return null
 
   return (
-    <section className="py-20 px-6 md:py-28">
+    <section ref={ref} className="py-20 px-6 md:py-28">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-14 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mb-14 text-center"
+        >
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
             Những người thân yêu
           </h2>
@@ -20,12 +31,17 @@ export function PartySection({ members }: PartySectionProps) {
             <div className="h-1.5 w-1.5 rounded-full bg-accent/60" />
             <div className="h-px w-12 bg-accent/40" />
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-          {members.map((member) => (
-            <div key={member.id} className="text-center">
-              {/* Avatar */}
+          {members.map((member, idx) => (
+            <motion.div
+              key={member.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: idx * 0.08, ease: 'easeOut' }}
+              className="text-center"
+            >
               <div className="relative mx-auto mb-3 h-24 w-24 overflow-hidden rounded-full border-2 border-accent/20 md:h-28 md:w-28">
                 {member.photo_url ? (
                   <Image
@@ -51,10 +67,10 @@ export function PartySection({ members }: PartySectionProps) {
                   {member.description}
                 </p>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }

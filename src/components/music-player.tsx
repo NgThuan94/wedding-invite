@@ -41,8 +41,8 @@ export function MusicPlayer({ platform, url, autoplay }: MusicPlayerProps) {
         />
       )}
 
-      {/* Player container — bottom-right desktop, bottom-center mobile */}
-      <div className="fixed bottom-6 right-6 z-50 max-sm:right-1/2 max-sm:translate-x-1/2">
+      {/* Player container — bottom-right, moves up above share bar on mobile */}
+      <div className="fixed bottom-6 right-6 z-50 max-sm:bottom-20 max-sm:right-4">
         {/* Expanded: bottom sheet style */}
         {isExpanded && (
           <div className="mb-3 w-[min(340px,90vw)] overflow-hidden rounded-2xl bg-white shadow-2xl">

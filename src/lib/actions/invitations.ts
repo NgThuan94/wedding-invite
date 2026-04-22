@@ -161,6 +161,7 @@ export type BasicInfoPayload = {
   music_platform: string | null
   music_url: string | null
   music_autoplay: boolean | null
+  template_style: string | null
 }
 
 export type TimelineItemPayload = {
@@ -197,14 +198,20 @@ export async function updateInvitationBasicInfo(
   // Split music fields out — they require a separate migration (0002).
   // Only include them when at least one music field is non-default so that
   // the save still works even if the migration hasn't been run yet.
-  const { music_enabled, music_platform, music_url, music_autoplay, ...baseData } = data
+  const { music_enabled, music_platform, music_url, music_autoplay, template_style, ...baseData } = data
 
   const musicFieldsChanged =
     music_enabled !== false || music_platform !== null || music_url !== null
 
-  const payload = musicFieldsChanged
-    ? { ...baseData, music_enabled, music_platform, music_url, music_autoplay, updated_at: new Date().toISOString() }
-    : { ...baseData, updated_at: new Date().toISOString() }
+  // template_style requires migration 0004 — only include when non-default
+  const templateStyleChanged = template_style !== null && template_style !== 'elegant'
+
+  const payload = {
+    ...baseData,
+    ...(musicFieldsChanged ? { music_enabled, music_platform, music_url, music_autoplay } : {}),
+    ...(templateStyleChanged ? { template_style } : {}),
+    updated_at: new Date().toISOString(),
+  }
 
   const { error } = await supabase
     .from('invitations')

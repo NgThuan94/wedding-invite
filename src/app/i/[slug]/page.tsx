@@ -4,13 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PreviewBanner } from '@/components/preview-banner';
 import { MusicPlayer } from '@/components/music-player';
-import { HeroSection } from './_components/hero-section';
-import { StorySection } from './_components/story-section';
-import { TimelineSection } from './_components/timeline-section';
-import { DetailsSection } from './_components/details-section';
-import { GallerySection } from './_components/gallery-section';
-import { PartySection } from './_components/party-section';
-import { RsvpSection } from './_components/rsvp-section';
+import { ShareButtons } from '@/components/share-buttons';
+import { ElegantTemplate } from './_templates/elegant-template';
+import { RomanticTemplate } from './_templates/romantic-template';
+import { MinimalistTemplate } from './_templates/minimalist-template';
 import type { MusicPlatform } from '@/lib/constants/music-presets';
 
 // ---------------------------------------------------------------------------
@@ -115,46 +112,42 @@ export default async function PublicInvitationPage({
     void (admin as any).rpc('increment_view_count', { invitation_id: inv.id });
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const publicUrl = `${appUrl}/i/${inv.slug}`
+  const templateStyle = inv.template_style ?? 'elegant'
+  const coupleName = [inv.groom_name, inv.bride_name].filter(Boolean).join(' & ')
+  const templateProps = {
+    inv,
+    timeline,
+    party,
+    galleryImages,
+    isOwnerPreview,
+  }
+
+  const TemplateComponent =
+    templateStyle === 'romantic' ? RomanticTemplate :
+    templateStyle === 'minimalist' ? MinimalistTemplate :
+    ElegantTemplate
+
   return (
-    <div className="min-h-screen bg-background">
+    <>
       {isOwnerPreview && <PreviewBanner invitationId={inv.id} />}
 
-      <HeroSection
-        coverPhotoUrl={inv.cover_photo_url}
-        brideName={inv.bride_name}
-        groomName={inv.groom_name}
-        weddingDate={inv.wedding_date}
-        hashtag={inv.hashtag}
-      />
+      <TemplateComponent {...templateProps} />
 
-      {inv.story && <StorySection story={inv.story} />}
+      {/* Share buttons — not shown in owner preview */}
+      {!isOwnerPreview && (
+        <ShareButtons
+          publicUrl={publicUrl}
+          coupleName={coupleName}
+          weddingDate={inv.wedding_date}
+          weddingTime={inv.wedding_time}
+          venueName={inv.venue_name}
+          venueAddress={inv.venue_address}
+        />
+      )}
 
-      <TimelineSection items={timeline} />
-
-      <DetailsSection
-        weddingDate={inv.wedding_date}
-        weddingTime={inv.wedding_time}
-        venueName={inv.venue_name}
-        venueAddress={inv.venue_address}
-        venueMapUrl={inv.venue_map_url}
-        dressCode={inv.dress_code}
-        liveStreamUrl={inv.live_stream_url}
-      />
-
-      {galleryImages.length > 0 && <GallerySection images={galleryImages} />}
-
-      <PartySection members={party} />
-
-      <RsvpSection invitationId={inv.id} />
-
-      {/* Footer */}
-      <footer className="py-8 text-center">
-        <p className="text-xs text-muted-foreground/60">
-          Được tạo bằng <span className="text-accent">Thiệp Cưới Online</span>
-        </p>
-      </footer>
-
-      {/* Music player — rendered client-side only when music is enabled */}
+      {/* Music player */}
       {inv.music_enabled && inv.music_url && inv.music_platform && (
         <MusicPlayer
           platform={inv.music_platform as MusicPlatform}
@@ -162,6 +155,6 @@ export default async function PublicInvitationPage({
           autoplay={inv.music_autoplay ?? true}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -214,6 +214,27 @@ export function SectionSettings({
         />
       </div>
 
+      {/* Template style */}
+      <div className="grid gap-1.5">
+        <Label htmlFor="settings-template">Giao diện thiệp</Label>
+        <Select
+          value={flatFields.template_style}
+          onValueChange={(v) => v && onFlatChange({ template_style: v })}
+        >
+          <SelectTrigger id="settings-template">
+            <SelectValue placeholder="Chọn giao diện" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="elegant">Elegant — Thanh lịch (mặc định)</SelectItem>
+            <SelectItem value="romantic">Romantic — Lãng mạn</SelectItem>
+            <SelectItem value="minimalist">Minimalist — Tối giản</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Thay đổi giao diện tổng thể của thiệp cưới.
+        </p>
+      </div>
+
       {/* Live stream URL */}
       <div className="grid gap-1.5">
         <Label htmlFor="settings-live-stream">Link live stream</Label>

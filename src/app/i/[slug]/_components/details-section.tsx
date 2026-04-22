@@ -1,23 +1,32 @@
-import { CalendarIcon, MapPinIcon, ShirtIcon, TvIcon } from 'lucide-react';
+'use client'
+
+import { motion } from 'framer-motion'
+import { CalendarIcon, MapPinIcon, ShirtIcon, TvIcon } from 'lucide-react'
+import { useScrollReveal } from '@/lib/hooks/use-scroll-reveal'
+import { CountdownTimer } from '@/components/countdown-timer'
 
 interface DetailsSectionProps {
-  weddingDate: string | null;
-  weddingTime: string | null;
-  venueName: string | null;
-  venueAddress: string | null;
-  venueMapUrl: string | null;
-  dressCode: string | null;
-  liveStreamUrl: string | null;
+  weddingDate: string | null
+  weddingTime: string | null
+  venueName: string | null
+  venueAddress: string | null
+  venueMapUrl: string | null
+  dressCode: string | null
+  liveStreamUrl: string | null
 }
 
 function formatWeddingDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
+  const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('vi-VN', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  });
+  })
+}
+
+function buildMapsUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 }
 
 export function DetailsSection({
@@ -29,8 +38,18 @@ export function DetailsSection({
   dressCode,
   liveStreamUrl,
 }: DetailsSectionProps) {
+  const { ref, inView } = useScrollReveal()
+
+  const mapsUrl = venueMapUrl || (venueAddress ? buildMapsUrl(venueAddress) : null)
+
   return (
-    <section className="py-20 px-6 md:py-28">
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      className="py-20 px-6 md:py-28"
+    >
       <div className="mx-auto max-w-xl">
         <div className="mb-14 text-center">
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
@@ -42,6 +61,9 @@ export function DetailsSection({
             <div className="h-px w-12 bg-accent/40" />
           </div>
         </div>
+
+        {/* Countdown */}
+        {weddingDate && <CountdownTimer targetDate={weddingDate} className="mb-8" />}
 
         <div className="space-y-6">
           {/* Date & Time */}
@@ -66,14 +88,14 @@ export function DetailsSection({
                 {venueAddress && (
                   <p className="mt-0.5 text-sm text-muted-foreground">{venueAddress}</p>
                 )}
-                {venueMapUrl && (
+                {mapsUrl && (
                   <a
-                    href={venueMapUrl}
+                    href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-2 inline-block text-sm font-medium text-accent underline-offset-4 hover:underline"
                   >
-                    Xem bản đồ →
+                    Mở Google Maps →
                   </a>
                 )}
               </div>
@@ -110,6 +132,6 @@ export function DetailsSection({
           )}
         </div>
       </div>
-    </section>
-  );
+    </motion.section>
+  )
 }

@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { XIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useScrollReveal } from '@/lib/hooks/use-scroll-reveal';
 
 interface GallerySectionProps {
   images: string[];
@@ -10,6 +12,7 @@ interface GallerySectionProps {
 
 export function GallerySection({ images }: GallerySectionProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const { ref, inView } = useScrollReveal(0.1);
 
   if (images.length === 0) return null;
 
@@ -28,9 +31,14 @@ export function GallerySection({ images }: GallerySectionProps) {
   }
 
   return (
-    <section className="py-20 px-6 md:py-28 bg-secondary/40">
+    <section ref={ref} className="py-20 px-6 md:py-28 bg-secondary/40">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-14 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mb-14 text-center"
+        >
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
             Khoảnh khắc của chúng mình
           </h2>
@@ -39,13 +47,16 @@ export function GallerySection({ images }: GallerySectionProps) {
             <div className="h-1.5 w-1.5 rounded-full bg-accent/60" />
             <div className="h-px w-12 bg-accent/40" />
           </div>
-        </div>
+        </motion.div>
 
         {/* CSS columns masonry */}
         <div className="columns-2 gap-3 md:columns-3">
           {images.map((src, idx) => (
-            <button
+            <motion.button
               key={src}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
+              transition={{ duration: 0.4, delay: idx * 0.06, ease: 'easeOut' }}
               onClick={() => setLightboxIndex(idx)}
               className="mb-3 block w-full overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
@@ -58,7 +69,7 @@ export function GallerySection({ images }: GallerySectionProps) {
                 loading="lazy"
                 sizes="(max-width: 768px) 50vw, 33vw"
               />
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

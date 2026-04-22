@@ -86,6 +86,7 @@ export type Database = {
           music_platform: string | null
           music_url: string | null
           published_at: string | null
+          rsvp_count: number
           slug: string
           status: string
           story: string | null
@@ -99,6 +100,7 @@ export type Database = {
           venue_map_url: string | null
           venue_name: string | null
           view_count: number
+          template_style: string | null
           wedding_date: string | null
           wedding_time: string | null
         }
@@ -120,6 +122,7 @@ export type Database = {
           music_platform?: string | null
           music_url?: string | null
           published_at?: string | null
+          rsvp_count?: number
           slug: string
           status?: string
           story?: string | null
@@ -133,6 +136,7 @@ export type Database = {
           venue_map_url?: string | null
           venue_name?: string | null
           view_count?: number
+          template_style?: string | null
           wedding_date?: string | null
           wedding_time?: string | null
         }
@@ -154,6 +158,7 @@ export type Database = {
           music_platform?: string | null
           music_url?: string | null
           published_at?: string | null
+          rsvp_count?: number
           slug?: string
           status?: string
           story?: string | null
@@ -166,6 +171,7 @@ export type Database = {
           venue_lng?: number | null
           venue_map_url?: string | null
           venue_name?: string | null
+          template_style?: string | null
           view_count?: number
           wedding_date?: string | null
           wedding_time?: string | null

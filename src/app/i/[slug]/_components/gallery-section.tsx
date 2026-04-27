@@ -58,7 +58,7 @@ export function GallerySection({ images }: GallerySectionProps) {
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.4, delay: idx * 0.06, ease: 'easeOut' }}
               onClick={() => setLightboxIndex(idx)}
-              className="mb-3 block w-full overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="mb-3 block w-full cursor-pointer overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Image
                 src={src}
@@ -88,7 +88,7 @@ export function GallerySection({ images }: GallerySectionProps) {
           {/* Close */}
           <button
             onClick={() => setLightboxIndex(null)}
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            className="absolute right-4 top-4 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
             aria-label="Đóng"
           >
             <XIcon className="h-5 w-5" />
@@ -98,7 +98,7 @@ export function GallerySection({ images }: GallerySectionProps) {
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); prev(); }}
-              className="absolute left-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+              className="absolute left-4 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
               aria-label="Ảnh trước"
             >
               <ChevronLeftIcon className="h-6 w-6" />
@@ -124,7 +124,7 @@ export function GallerySection({ images }: GallerySectionProps) {
           {images.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); next(); }}
-              className="absolute right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+              className="absolute right-4 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
               aria-label="Ảnh sau"
             >
               <ChevronRightIcon className="h-6 w-6" />

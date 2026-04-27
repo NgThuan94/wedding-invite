@@ -61,7 +61,7 @@ export default function SignInPage() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

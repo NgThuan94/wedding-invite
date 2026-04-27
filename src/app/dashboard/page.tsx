@@ -36,7 +36,7 @@ export default async function DashboardPage() {
   const { data: invitations, error } = await supabase
     .from('invitations')
     .select(
-      'id, slug, bride_name, groom_name, wedding_date, status, tier, cover_photo_url, rsvp_count'
+      'id, slug, bride_name, groom_name, wedding_date, status, tier, cover_photo_url, rsvp_count, template_style'
     )
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });

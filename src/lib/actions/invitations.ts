@@ -167,7 +167,6 @@ export type BasicInfoPayload = {
   groom_full_name: string | null
   wedding_date: string | null
   wedding_time: string | null
-  hashtag: string | null
   venue_name: string | null
   venue_address: string | null
   venue_map_url: string | null

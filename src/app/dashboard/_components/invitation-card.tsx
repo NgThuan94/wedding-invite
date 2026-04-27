@@ -32,16 +32,19 @@ type Invitation = Pick<
   | 'tier'
   | 'cover_photo_url'
   | 'rsvp_count'
+  | 'template_style'
 >;
 
 interface InvitationCardProps {
   invitation: Invitation;
 }
 
-const STATUS_STYLES = {
-  published: 'bg-[var(--chart-1)]/20 text-[var(--chart-1)]',
-  draft: 'bg-secondary text-muted-foreground',
-} as const;
+const TEMPLATE_LABELS: Record<string, string> = {
+  elegant: 'Elegant',
+  romantic: 'Romantic',
+  'romantic-v2': 'Romantic V2',
+  minimalist: 'Minimalist',
+};
 
 export function InvitationCard({ invitation }: InvitationCardProps) {
   const [isPending, startTransition] = useTransition();
@@ -54,8 +57,8 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
 
   const weddingDate = formatDateVi(invitation.wedding_date);
   const isPublished = invitation.status === 'published';
-  const statusStyle = isPublished ? STATUS_STYLES.published : STATUS_STYLES.draft;
-  const statusLabel = isPublished ? 'Đã đăng' : 'Bản nháp';
+  const templateLabel =
+    TEMPLATE_LABELS[invitation.template_style ?? ''] ?? invitation.template_style ?? 'Elegant';
 
   function handleDelete() {
     startTransition(async () => {
@@ -71,6 +74,7 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
+      {/* Cover image */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
         {invitation.cover_photo_url ? (
           <Image
@@ -83,25 +87,41 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
           <GradientPlaceholder tier={invitation.tier} className="h-full w-full" />
         )}
 
+        {/* Status badge — nổi hơn với backdrop */}
         <span
-          className={`absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusStyle}`}
+          className={[
+            'absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm backdrop-blur-sm',
+            isPublished
+              ? 'bg-[#2C3E2F]/85 text-white'
+              : 'bg-black/45 text-white/90',
+          ].join(' ')}
         >
-          {statusLabel}
+          {isPublished ? '● Đã đăng' : 'Bản nháp'}
         </span>
-        <span className="absolute right-3 top-3 rounded-full border border-border bg-card px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
+
+        {/* Tier badge */}
+        <span className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/35 px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase text-white backdrop-blur-sm">
           {invitation.tier}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        {/* Name + template */}
         <div>
           <div className="font-serif text-xl font-medium text-foreground">{displayName}</div>
-          <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Calendar className="size-3.5" />
-            {weddingDate || 'Chưa có ngày cưới'}
+          <div className="mt-1.5 flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Calendar className="size-3.5" />
+              {weddingDate || 'Chưa có ngày'}
+            </span>
+            <span className="h-3.5 w-px bg-border" aria-hidden />
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              {templateLabel}
+            </span>
           </div>
         </div>
 
+        {/* Stats (published only) */}
         {isPublished && (
           <div className="flex justify-between rounded-lg bg-secondary px-4 py-3">
             <div>
@@ -117,6 +137,7 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
           </div>
         )}
 
+        {/* Actions */}
         <div className="mt-auto flex gap-1.5">
           <Link
             href={`/invitations/${invitation.id}/edit`}
@@ -151,7 +172,7 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
               render={
                 <button
                   aria-label="Xóa thiệp"
-                  className="flex items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-sm text-destructive transition-colors hover:border-destructive/30 hover:bg-destructive/10"
+                  className="flex cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-3 py-2 text-sm text-destructive transition-colors hover:border-destructive/30 hover:bg-destructive/10"
                 />
               }
             >
@@ -161,7 +182,7 @@ export function InvitationCard({ invitation }: InvitationCardProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Xóa thiệp cưới?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Thiệp “{displayName}” sẽ bị xóa vĩnh viễn. Không thể khôi phục.
+                  Thiệp "{displayName}" sẽ bị xóa vĩnh viễn. Không thể khôi phục.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

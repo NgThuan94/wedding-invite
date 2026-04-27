@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { useScrollReveal } from '@/lib/hooks/use-scroll-reveal'
 import type { Tables } from '@/types/database'
 
@@ -16,13 +16,31 @@ function formatEventDate(dateStr: string): string {
 
 export function TimelineSection({ items }: TimelineSectionProps) {
   const { ref, inView } = useScrollReveal(0.1)
+  const { scrollY } = useScroll()
+
+  const blobTopY    = useTransform(scrollY, [400, 2400], [-50, 50])
+  const blobBottomY = useTransform(scrollY, [400, 2400], [50, -50])
+  const headingY    = useTransform(scrollY, [400, 2400], [-16, 16])
 
   if (items.length === 0) return null
 
   return (
-    <section ref={ref} className="py-20 px-6 md:py-28 bg-secondary/40">
+    <section className="relative overflow-hidden py-20 px-6 md:py-28 bg-secondary/40">
+      {/* Parallax background blobs */}
+      <motion.div
+        aria-hidden
+        style={{ y: blobTopY }}
+        className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-accent/8 blur-3xl"
+      />
+      <motion.div
+        aria-hidden
+        style={{ y: blobBottomY }}
+        className="pointer-events-none absolute -left-16 bottom-0 h-80 w-80 rounded-full bg-accent/6 blur-3xl"
+      />
+
       <div className="mx-auto max-w-2xl">
         <motion.div
+          ref={ref as React.Ref<HTMLDivElement>}
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -31,11 +49,11 @@ export function TimelineSection({ items }: TimelineSectionProps) {
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
             Những kỷ niệm đáng nhớ
           </h2>
-          <div className="mt-4 flex items-center justify-center gap-4">
+          <motion.div style={{ y: headingY }} className="mt-4 flex items-center justify-center gap-4">
             <div className="h-px w-12 bg-accent/40" />
             <div className="h-1.5 w-1.5 rounded-full bg-accent/60" />
             <div className="h-px w-12 bg-accent/40" />
-          </div>
+          </motion.div>
         </motion.div>
 
         <div className="relative">

@@ -7,7 +7,6 @@ import { CalendarIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ImageUploadZone } from '@/components/image-upload-zone'
@@ -108,16 +107,16 @@ export function SectionBasicInfo({
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger
               render={
-                <Button
-                  variant="outline"
+                <button
+                  type="button"
                   className={cn(
-                    'w-full justify-start gap-2 font-normal',
+                    'flex h-10 w-full cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
                     !fields.wedding_date && 'text-muted-foreground'
                   )}
                 />
               }
             >
-              <CalendarIcon className="h-4 w-4 shrink-0" />
+              <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
               {dateLabel}
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -143,20 +142,6 @@ export function SectionBasicInfo({
             onChange={(e) => onChange({ wedding_time: e.target.value })}
           />
         </div>
-      </div>
-
-      {/* Hashtag */}
-      <div className="grid gap-1.5">
-        <Label htmlFor="hashtag">
-          Hashtag{' '}
-          <span className="text-muted-foreground font-normal">(tuỳ chọn)</span>
-        </Label>
-        <Input
-          id="hashtag"
-          value={fields.hashtag}
-          placeholder="#MinhAnhGiaHuyWedding"
-          onChange={(e) => onChange({ hashtag: e.target.value })}
-        />
       </div>
 
       {/* Cover photo */}

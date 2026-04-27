@@ -75,7 +75,7 @@ function FilterRow({ label, items, active, onSelect }: FilterRowProps) {
             type="button"
             onClick={() => onSelect(item.value)}
             className={cn(
-              'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+              'cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
               active === item.value
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'border-border bg-card text-foreground hover:border-foreground/40'

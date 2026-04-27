@@ -108,7 +108,7 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
                 type="button"
                 onClick={() => setFilter(tab.value)}
                 className={cn(
-                  'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+                  'cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
                   isActive
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border bg-card text-foreground hover:border-foreground/40'
@@ -141,7 +141,7 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
               >
                 <X className="size-3.5" />
               </button>
@@ -152,7 +152,7 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
             type="button"
             onClick={handleCopyLink}
             disabled={isCopying}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
           >
             <Share2 className="size-3.5" /> Sao chép link
           </button>
@@ -161,7 +161,7 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
             type="button"
             onClick={handleExport}
             disabled={isExporting}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
           >
             {isExporting ? (
               <Loader2 className="size-3.5 animate-spin" />

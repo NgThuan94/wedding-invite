@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --animate-accordion-down: accordion-down 0.22s ease-out;
+  --animate-accordion-up: accordion-up 0.22s ease-out;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans-variable);
@@ -135,6 +137,16 @@
   h4 {
     font-family: var(--font-serif);
   }
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--accordion-panel-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--accordion-panel-height); }
+  to { height: 0; }
 }
 
 @layer utilities {

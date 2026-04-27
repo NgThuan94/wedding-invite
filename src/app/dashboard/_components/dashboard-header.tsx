@@ -41,7 +41,7 @@ export function DashboardHeader({ email }: DashboardHeaderProps) {
           <form action={signOut}>
             <button
               type="submit"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
             >
               Đăng xuất
             </button>

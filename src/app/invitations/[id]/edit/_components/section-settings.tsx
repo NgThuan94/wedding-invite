@@ -263,7 +263,7 @@ export function SectionSettings({
             role="switch"
             aria-checked={flatFields.music_enabled}
             onClick={() => onFlatChange({ music_enabled: !flatFields.music_enabled })}
-            className={`relative h-6 w-11 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+            className={`relative h-6 w-11 cursor-pointer rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               ${flatFields.music_enabled ? 'bg-primary' : 'bg-input'}`}
           >
             <span
@@ -308,7 +308,7 @@ export function SectionSettings({
                         onFlatChange({ music_url: preset.url })
                         setMusicUrlError(null)
                       }}
-                      className={`rounded-full border px-3 py-1 text-xs transition-colors
+                      className={`cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors
                         ${flatFields.music_url === preset.url
                           ? 'border-accent bg-accent/10 text-accent'
                           : 'border-border text-muted-foreground hover:border-accent/50'
@@ -347,7 +347,7 @@ export function SectionSettings({
                 role="switch"
                 aria-checked={flatFields.music_autoplay}
                 onClick={() => onFlatChange({ music_autoplay: !flatFields.music_autoplay })}
-                className={`relative h-5 w-9 rounded-full transition-colors
+                className={`relative h-5 w-9 cursor-pointer rounded-full transition-colors
                   ${flatFields.music_autoplay ? 'bg-primary' : 'bg-input'}`}
               >
                 <span

@@ -3,7 +3,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowLeft, Copy, Eye, ExternalLink, Share2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  Copy,
+  ExternalLink,
+  Eye,
+  Heart,
+  MapPin,
+  Settings2,
+  Share2,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -39,7 +51,6 @@ export type FlatFields = {
   groom_full_name: string;
   wedding_date: string | null;
   wedding_time: string;
-  hashtag: string;
   venue_name: string;
   venue_address: string;
   venue_map_url: string;
@@ -61,7 +72,6 @@ function initFlatFields(inv: Tables<'invitations'>): FlatFields {
     groom_full_name: inv.groom_full_name ?? '',
     wedding_date: inv.wedding_date ?? null,
     wedding_time: inv.wedding_time ?? '',
-    hashtag: inv.hashtag ?? '',
     venue_name: inv.venue_name ?? '',
     venue_address: inv.venue_address ?? '',
     venue_map_url: inv.venue_map_url ?? '',
@@ -107,7 +117,6 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         groom_full_name: fields.groom_full_name || null,
         wedding_date: fields.wedding_date || null,
         wedding_time: fields.wedding_time || null,
-        hashtag: fields.hashtag || null,
         venue_name: fields.venue_name || null,
         venue_address: fields.venue_address || null,
         venue_map_url: fields.venue_map_url || null,
@@ -172,34 +181,41 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
     });
   }
 
-  const displayName =
-    flatFields.bride_name && flatFields.groom_name
-      ? `${flatFields.groom_name} & ${flatFields.bride_name}`
-      : flatFields.bride_name || flatFields.groom_name || 'Chưa đặt tên';
-
-  const slugUrl = invitation.slug ? `thiep.vn/i/${invitation.slug}` : 'Chưa có slug';
-  const publicUrl = publishedSlug ? `${appUrl}/i/${publishedSlug}` : '';
+  const groomName = flatFields.groom_name;
+  const brideName = flatFields.bride_name;
+  const hasBothNames = groomName && brideName;
   const isPublished = status === 'published';
+  const publicUrl = publishedSlug ? `${appUrl}/i/${publishedSlug}` : '';
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 border-b border-border bg-card">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-20 border-b border-border bg-card/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:gap-4 md:px-8">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Dashboard</span>
+            <ArrowLeft className="size-4" />
+            <span className="hidden sm:inline">Dashboard</span>
           </button>
 
           <div className="hidden h-5 w-px bg-border sm:block" aria-hidden />
 
           <div className="min-w-0 flex-1">
-            <div className="truncate font-serif text-base font-medium leading-tight md:text-lg">
-              {displayName}
+            {hasBothNames ? (
+              <div className="truncate font-serif text-base font-medium leading-tight md:text-lg">
+                {groomName}{' '}
+                <span className="font-normal text-accent italic">&</span>{' '}
+                {brideName}
+              </div>
+            ) : (
+              <div className="truncate text-sm text-muted-foreground">Chưa đặt tên</div>
+            )}
+            <div className="truncate font-mono text-[11px] text-muted-foreground">
+              {invitation.slug ? `thiep.vn/i/${invitation.slug}` : 'Chưa có slug'}
             </div>
-            <div className="truncate font-mono text-[11px] text-muted-foreground">{slugUrl}</div>
           </div>
 
           <SaveIndicator status={autoSaveStatus} />
@@ -211,100 +227,168 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
               rel="noopener noreferrer"
               className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted sm:inline-flex"
             >
-              <Eye className="size-3.5" /> Xem trước
+              <Eye className="size-3.5" />
+              Xem trước
             </a>
           )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-10">
-        <div className="mb-6 md:mb-8">
-          <h1 className="font-serif text-3xl font-normal tracking-tight md:text-4xl">
+      {/* ── Main ── */}
+      <main className="mx-auto max-w-3xl px-4 py-10 md:px-6 md:py-12">
+        {/* Page heading */}
+        <div className="mb-8">
+          <div className="mb-2 text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
             Chỉnh sửa thiệp cưới
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </div>
+          {hasBothNames ? (
+            <h1 className="font-serif text-4xl font-normal tracking-tight md:text-5xl">
+              {groomName}{' '}
+              <span className="text-accent italic">&</span>{' '}
+              {brideName}
+            </h1>
+          ) : (
+            <h1 className="font-serif text-4xl font-normal tracking-tight text-muted-foreground md:text-5xl">
+              Thiệp của tôi
+            </h1>
+          )}
+          <p className="mt-2 text-sm text-muted-foreground">
             Thay đổi sẽ tự động lưu sau vài giây.
           </p>
         </div>
 
+        {/* Sections */}
         <Accordion multiple defaultValue={['basic', 'venue', 'story']}>
-          <AccordionItem value="basic">
-            <AccordionTrigger className="text-base font-medium">Thông tin cơ bản</AccordionTrigger>
-            <AccordionContent>
-              <SectionBasicInfo
-                fields={flatFields}
-                onChange={handleFieldChange}
-                invitationId={invitation.id}
-                userId={invitation.user_id}
-                coverPhotoUrl={invitation.cover_photo_url ?? null}
-                galleryImages={
-                  Array.isArray(invitation.gallery_images)
-                    ? (invitation.gallery_images as string[])
-                    : []
-                }
-                uploadFile={(file) => uploadFile(file, 'cover')}
-              />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard>
+            <AccordionItem value="basic" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground">
+                    <Heart className="size-4" />
+                  </span>
+                  Thông tin cơ bản
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionBasicInfo
+                  fields={flatFields}
+                  onChange={handleFieldChange}
+                  invitationId={invitation.id}
+                  userId={invitation.user_id}
+                  coverPhotoUrl={invitation.cover_photo_url ?? null}
+                  galleryImages={
+                    Array.isArray(invitation.gallery_images)
+                      ? (invitation.gallery_images as string[])
+                      : []
+                  }
+                  uploadFile={(file) => uploadFile(file, 'cover')}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
 
-          <AccordionItem value="venue">
-            <AccordionTrigger className="text-base font-medium">Địa điểm</AccordionTrigger>
-            <AccordionContent>
-              <SectionVenue fields={flatFields} onChange={handleFieldChange} />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard>
+            <AccordionItem value="venue" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground">
+                    <MapPin className="size-4" />
+                  </span>
+                  Địa điểm
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionVenue fields={flatFields} onChange={handleFieldChange} />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
 
-          <AccordionItem value="story">
-            <AccordionTrigger className="text-base font-medium">Chuyện tình</AccordionTrigger>
-            <AccordionContent>
-              <SectionStory fields={flatFields} onChange={handleFieldChange} />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard>
+            <AccordionItem value="story" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground">
+                    <BookOpen className="size-4" />
+                  </span>
+                  Chuyện tình
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionStory fields={flatFields} onChange={handleFieldChange} />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
 
-          <AccordionItem value="timeline">
-            <AccordionTrigger className="text-base font-medium">Các mốc tình yêu</AccordionTrigger>
-            <AccordionContent>
-              <SectionTimeline
-                invitationId={invitation.id}
-                initialItems={timeline}
-                onDirtyChange={setTimelineDirty}
-                uploadFile={(file) => uploadFile(file, 'timeline')}
-              />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard>
+            <AccordionItem value="timeline" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground">
+                    <Clock className="size-4" />
+                  </span>
+                  Các mốc tình yêu
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionTimeline
+                  invitationId={invitation.id}
+                  initialItems={timeline}
+                  onDirtyChange={setTimelineDirty}
+                  uploadFile={(file) => uploadFile(file, 'timeline')}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
 
-          <AccordionItem value="party">
-            <AccordionTrigger className="text-base font-medium">Đoàn cưới</AccordionTrigger>
-            <AccordionContent>
-              <SectionParty
-                invitationId={invitation.id}
-                initialMembers={party}
-                onDirtyChange={setPartyDirty}
-                uploadFile={(file) => uploadFile(file, 'party')}
-              />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard>
+            <AccordionItem value="party" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground">
+                    <Users className="size-4" />
+                  </span>
+                  Đoàn cưới
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionParty
+                  invitationId={invitation.id}
+                  initialMembers={party}
+                  onDirtyChange={setPartyDirty}
+                  uploadFile={(file) => uploadFile(file, 'party')}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
 
-          <AccordionItem value="settings">
-            <AccordionTrigger className="text-base font-medium">
-              Cài đặt &amp; Xuất bản
-            </AccordionTrigger>
-            <AccordionContent>
-              <SectionSettings
-                invitationId={invitation.id}
-                initialSlug={invitation.slug}
-                initialLiveStreamUrl={invitation.live_stream_url ?? ''}
-                status={status}
-                onDirtyChange={setSlugDirty}
-                flatFields={flatFields}
-                onFlatChange={handleFieldChange}
-                onPublishSuccess={handlePublishSuccess}
-              />
-            </AccordionContent>
-          </AccordionItem>
+          <EditorCard highlight>
+            <AccordionItem value="settings" className="border-none">
+              <AccordionTrigger className="px-6 py-4 text-sm font-medium hover:no-underline">
+                <span className="flex items-center gap-3">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Settings2 className="size-4" />
+                  </span>
+                  Cài đặt &amp; Xuất bản
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <SectionSettings
+                  invitationId={invitation.id}
+                  initialSlug={invitation.slug}
+                  initialLiveStreamUrl={invitation.live_stream_url ?? ''}
+                  status={status}
+                  onDirtyChange={setSlugDirty}
+                  flatFields={flatFields}
+                  onFlatChange={handleFieldChange}
+                  onPublishSuccess={handlePublishSuccess}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </EditorCard>
         </Accordion>
       </main>
 
+      {/* ── Confirm leave dialog ── */}
       <Dialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
@@ -324,6 +408,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         </DialogContent>
       </Dialog>
 
+      {/* ── Publish success dialog ── */}
       <Dialog
         open={publishedSlug !== null}
         onOpenChange={(open) => {
@@ -369,6 +454,25 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function EditorCard({
+  children,
+  highlight,
+}: {
+  children: React.ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={[
+        'mb-3 overflow-hidden rounded-xl border bg-card',
+        highlight ? 'border-primary/20' : 'border-border',
+      ].join(' ')}
+    >
+      {children}
     </div>
   );
 }

@@ -86,7 +86,7 @@ function SortableItem({ url, onRemove, disabled }: SortableItemProps) {
         type="button"
         onClick={() => onRemove(url)}
         disabled={disabled}
-        className="absolute top-1 right-1 hidden rounded-full bg-black/50 p-0.5 group-hover:flex hover:bg-destructive/80 transition-colors"
+        className="absolute top-1 right-1 hidden cursor-pointer rounded-full bg-black/50 p-0.5 group-hover:flex hover:bg-destructive/80 transition-colors"
         aria-label="Xóa ảnh"
       >
         <XIcon className="h-3.5 w-3.5 text-white" />
@@ -232,7 +232,7 @@ export function GalleryManager({ invitationId, userId, initialUrls }: GalleryMan
                   disabled={isBusy}
                   className={cn(
                     'aspect-square rounded-md border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground transition-colors',
-                    !isBusy && 'hover:border-primary/50 hover:text-foreground hover:bg-muted/40',
+                    !isBusy && 'cursor-pointer hover:border-primary/50 hover:text-foreground hover:bg-muted/40',
                     isBusy && 'opacity-50 cursor-not-allowed'
                   )}
                   aria-label="Thêm ảnh"

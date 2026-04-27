@@ -7,6 +7,7 @@ import { MusicPlayer } from '@/components/music-player';
 import { ShareButtons } from '@/components/share-buttons';
 import { ElegantTemplate } from './_templates/elegant-template';
 import { RomanticTemplate } from './_templates/romantic-template';
+import { RomanticV2Template } from './_templates/romantic-v2';
 import { MinimalistTemplate } from './_templates/minimalist-template';
 import type { MusicPlatform } from '@/lib/constants/music-presets';
 
@@ -125,8 +126,9 @@ export default async function PublicInvitationPage({
   }
 
   const TemplateComponent =
-    templateStyle === 'romantic' ? RomanticTemplate :
-    templateStyle === 'minimalist' ? MinimalistTemplate :
+    templateStyle === 'romantic-v2'  ? RomanticV2Template :
+    templateStyle === 'romantic'     ? RomanticTemplate :
+    templateStyle === 'minimalist'   ? MinimalistTemplate :
     ElegantTemplate
 
   return (

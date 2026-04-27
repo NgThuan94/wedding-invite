@@ -1,5 +1,3 @@
-import { UsersIcon, HeartIcon, XCircleIcon, CalendarIcon } from 'lucide-react';
-
 interface StatsCardsProps {
   totalRsvps: number;
   attendingCount: number;
@@ -13,50 +11,54 @@ export function StatsCards({
   attendingCount,
   notAttendingCount,
   totalGuests,
-  attendanceRate,
 }: StatsCardsProps) {
+  const pendingCount = Math.max(0, totalRsvps - attendingCount - notAttendingCount);
+
+  const cards = [
+    {
+      label: 'Đã xác nhận',
+      value: attendingCount,
+      tint: 'bg-[var(--chart-1)]/15',
+      color: 'text-[var(--chart-1)]',
+    },
+    {
+      label: 'Không tham dự',
+      value: notAttendingCount,
+      tint: 'bg-destructive/10',
+      color: 'text-destructive',
+    },
+    {
+      label: 'Chưa phản hồi',
+      value: pendingCount,
+      tint: 'bg-secondary',
+      color: 'text-muted-foreground',
+    },
+    {
+      label: 'Tổng số khách',
+      value: totalGuests,
+      tint: 'bg-transparent',
+      color: 'text-foreground',
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="mb-2 flex items-center gap-2 text-muted-foreground">
-          <UsersIcon className="h-4 w-4" />
-          <span className="text-xs font-medium">Tổng phản hồi</span>
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {cards.map((card) => (
+        <div
+          key={card.label}
+          className="relative overflow-hidden rounded-xl border border-border bg-card p-5"
+        >
+          <div className={`absolute inset-0 opacity-40 ${card.tint}`} aria-hidden />
+          <div className="relative">
+            <div className="text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
+              {card.label}
+            </div>
+            <div className={`mt-2 font-serif text-4xl font-medium leading-none ${card.color}`}>
+              {card.value}
+            </div>
+          </div>
         </div>
-        <p className="text-3xl font-semibold text-foreground">{totalRsvps}</p>
-      </div>
-
-      <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-        <div className="mb-2 flex items-center gap-2 text-green-700">
-          <HeartIcon className="h-4 w-4" />
-          <span className="text-xs font-medium">Tham dự</span>
-        </div>
-        <p className="text-3xl font-semibold text-green-700">{attendingCount}</p>
-        {totalRsvps > 0 && (
-          <p className="mt-1 text-xs text-green-600">{attendanceRate.toFixed(0)}%</p>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-        <div className="mb-2 flex items-center gap-2 text-red-600">
-          <XCircleIcon className="h-4 w-4" />
-          <span className="text-xs font-medium">Không tham dự</span>
-        </div>
-        <p className="text-3xl font-semibold text-red-600">{notAttendingCount}</p>
-        {totalRsvps > 0 && (
-          <p className="mt-1 text-xs text-red-500">
-            {(100 - attendanceRate).toFixed(0)}%
-          </p>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="mb-2 flex items-center gap-2 text-muted-foreground">
-          <CalendarIcon className="h-4 w-4" />
-          <span className="text-xs font-medium">Tổng khách</span>
-        </div>
-        <p className="text-3xl font-semibold text-foreground">{totalGuests}</p>
-        <p className="mt-1 text-xs text-muted-foreground">người</p>
-      </div>
+      ))}
     </div>
   );
 }

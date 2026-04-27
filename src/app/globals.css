@@ -12,6 +12,7 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-dancing: var(--font-dancing-variable);
   --font-lora: var(--font-lora-variable);
+  --font-allura: var(--font-allura-variable);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,38 +52,38 @@
 }
 
 :root {
-  --background: #FAF8F3;
-  --foreground: #1F1B17;
+  --background: #F7F4ED;
+  --foreground: #15161A;
   --card: #FFFFFF;
-  --card-foreground: #1F1B17;
+  --card-foreground: #15161A;
   --popover: #FFFFFF;
-  --popover-foreground: #1F1B17;
-  --primary: #2C3E2F;
-  --primary-foreground: #FAF8F3;
-  --secondary: #F0EBE0;
-  --secondary-foreground: #1F1B17;
-  --muted: #F0EBE0;
-  --muted-foreground: #6B5F54;
-  --accent: #B8956A;
-  --accent-foreground: #1F1B17;
+  --popover-foreground: #15161A;
+  --primary: #15161A;
+  --primary-foreground: #F7F4ED;
+  --secondary: #ECE6D8;
+  --secondary-foreground: #15161A;
+  --muted: #ECE6D8;
+  --muted-foreground: #5A5749;
+  --accent: #A8843A;
+  --accent-foreground: #15161A;
   --destructive: #8B3A2E;
-  --border: #E8E0D0;
-  --input: #E8E0D0;
-  --ring: #B8956A;
+  --border: #DCD3BD;
+  --input: #DCD3BD;
+  --ring: #A8843A;
   --radius: 0.75rem;
-  --chart-1: #8B9D83;
-  --chart-2: #B8956A;
-  --chart-3: #A5756A;
-  --chart-4: #D4C4A8;
-  --chart-5: #6B5F54;
-  --sidebar: #FAF8F3;
-  --sidebar-foreground: #1F1B17;
-  --sidebar-primary: #2C3E2F;
-  --sidebar-primary-foreground: #FAF8F3;
-  --sidebar-accent: #F0EBE0;
-  --sidebar-accent-foreground: #1F1B17;
-  --sidebar-border: #E8E0D0;
-  --sidebar-ring: #B8956A;
+  --chart-1: #7E7A5C;
+  --chart-2: #A8843A;
+  --chart-3: #7A4A3A;
+  --chart-4: #C7B98D;
+  --chart-5: #5A5749;
+  --sidebar: #F7F4ED;
+  --sidebar-foreground: #15161A;
+  --sidebar-primary: #15161A;
+  --sidebar-primary-foreground: #F7F4ED;
+  --sidebar-accent: #ECE6D8;
+  --sidebar-accent-foreground: #15161A;
+  --sidebar-border: #DCD3BD;
+  --sidebar-ring: #A8843A;
 }
 
 /* Dark mode — deprioritized, keeping existing structure */

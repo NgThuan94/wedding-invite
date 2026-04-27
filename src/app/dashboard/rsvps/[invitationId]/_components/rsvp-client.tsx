@@ -4,14 +4,15 @@ import { useState, useMemo, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { SearchIcon, XIcon, DownloadIcon, Loader2Icon, CheckIcon } from 'lucide-react';
+import { Check, Download, Loader2, Search, Share2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { exportRsvpsToExcel } from '@/lib/actions/rsvp';
+import { cn } from '@/lib/utils';
 import { RsvpEmptyState } from './empty-state';
 import type { Tables } from '@/types/database';
 
 type Rsvp = Tables<'rsvps'>;
-type Filter = 'all' | 'attending' | 'not_attending';
+type Filter = 'all' | 'attending' | 'not_attending' | 'pending';
 
 interface RsvpClientProps {
   rsvps: Rsvp[];
@@ -23,6 +24,17 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+
+  const counts = useMemo(
+    () => ({
+      all: rsvps.length,
+      attending: rsvps.filter((r) => r.attending).length,
+      not_attending: rsvps.filter((r) => !r.attending).length,
+      pending: 0,
+    }),
+    [rsvps]
+  );
 
   const filtered = useMemo(() => {
     return rsvps
@@ -34,10 +46,7 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
       .filter((r) => {
         if (!search.trim()) return true;
         const q = search.toLowerCase();
-        return (
-          r.name.toLowerCase().includes(q) ||
-          (r.phone ?? '').includes(q)
-        );
+        return r.name.toLowerCase().includes(q) || (r.phone ?? '').includes(q);
       });
   }, [rsvps, filter, search]);
 
@@ -65,131 +74,163 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
     }
   }, [invitationId]);
 
+  const handleCopyLink = useCallback(async () => {
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success('Đã sao chép link thiệp');
+    } catch {
+      toast.error('Không thể sao chép');
+    } finally {
+      setTimeout(() => setIsCopying(false), 600);
+    }
+  }, [publicUrl]);
+
   if (rsvps.length === 0) {
     return <RsvpEmptyState publicUrl={publicUrl} />;
   }
 
+  const filterTabs: { value: Filter; label: string }[] = [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'attending', label: 'Đã xác nhận' },
+    { value: 'not_attending', label: 'Không tham dự' },
+  ];
+
   return (
-    <div className="space-y-4">
-      {/* Controls */}
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Filter tabs */}
-        <div className="flex rounded-lg border border-border bg-muted/50 p-1 text-sm">
-          {(['all', 'attending', 'not_attending'] as Filter[]).map((f) => {
-            const labels: Record<Filter, string> = {
-              all: 'Tất cả',
-              attending: 'Tham dự',
-              not_attending: 'Không tham dự',
-            };
-            const counts: Record<Filter, number> = {
-              all: rsvps.length,
-              attending: rsvps.filter((r) => r.attending).length,
-              not_attending: rsvps.filter((r) => !r.attending).length,
-            };
+        <div className="flex flex-wrap gap-2">
+          {filterTabs.map((tab) => {
+            const isActive = filter === tab.value;
             return (
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
-                  filter === f
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                key={tab.value}
+                type="button"
+                onClick={() => setFilter(tab.value)}
+                className={cn(
+                  'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-card text-foreground hover:border-foreground/40'
+                )}
               >
-                {labels[f]}
-                <span className={`ml-1.5 text-xs ${filter === f ? 'text-accent' : 'text-muted-foreground'}`}>
-                  {counts[f]}
+                {tab.label}
+                <span
+                  className={cn(
+                    'ml-1.5 text-xs',
+                    isActive ? 'opacity-80' : 'text-muted-foreground'
+                  )}
+                >
+                  ({counts[tab.value]})
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Search + Export */}
-        <div className="flex gap-2">
-          <div className="relative flex-1 sm:w-56 sm:flex-none">
-            <SearchIcon className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 sm:w-64 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên hoặc SĐT..."
-              className="pl-8 pr-8"
+              placeholder="Tìm kiếm khách..."
+              className="pl-9 pr-9"
             />
             {search && (
               <button
+                type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <XIcon className="h-3.5 w-3.5" />
+                <X className="size-3.5" />
               </button>
             )}
           </div>
+
           <button
+            type="button"
+            onClick={handleCopyLink}
+            disabled={isCopying}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            <Share2 className="size-3.5" /> Sao chép link
+          </button>
+
+          <button
+            type="button"
             onClick={handleExport}
             disabled={isExporting}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
           >
             {isExporting ? (
-              <Loader2Icon className="h-4 w-4 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin" />
             ) : (
-              <DownloadIcon className="h-4 w-4" />
+              <Download className="size-3.5" />
             )}
             Excel
           </button>
         </div>
       </div>
 
-      {/* No results */}
       {filtered.length === 0 && (
         <div className="py-12 text-center text-sm text-muted-foreground">
           Không tìm thấy kết quả phù hợp
         </div>
       )}
 
-      {/* Desktop table */}
       {filtered.length > 0 && (
         <>
-          <div className="hidden overflow-hidden rounded-xl border border-border md:block">
+          <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  {['Tên', 'SĐT', 'Email', 'Số người', 'Trạng thái', 'Ghi chú', 'Thời gian'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                      {h}
-                    </th>
-                  ))}
+              <thead>
+                <tr className="border-b border-border bg-secondary text-left">
+                  {['Khách', 'Liên hệ', 'Số người', 'Lời nhắn', 'Thời gian', 'Trạng thái'].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-[11px] font-medium tracking-[0.05em] text-muted-foreground uppercase"
+                      >
+                        {h}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-medium text-foreground">{r.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.phone ?? '—'}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.email ?? '—'}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {r.attending ? `${r.adults_count}NL${r.children_count > 0 ? ` · ${r.children_count}TE` : ''}` : '—'}
+              <tbody>
+                {filtered.map((r, idx) => (
+                  <tr
+                    key={r.id}
+                    className={cn(
+                      'transition-colors hover:bg-secondary/40',
+                      idx < filtered.length - 1 && 'border-b border-border'
+                    )}
+                  >
+                    <td className="px-4 py-3.5">
+                      <div className="font-medium text-foreground">{r.name}</div>
+                      {r.email && (
+                        <div className="text-xs text-muted-foreground">{r.email}</div>
+                      )}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        r.attending
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-600'
-                      }`}>
-                        {r.attending && <CheckIcon className="h-3 w-3" />}
-                        {r.attending ? 'Tham dự' : 'Không tham dự'}
-                      </span>
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
+                      {r.phone ?? '—'}
                     </td>
-                    <td className="px-4 py-3 max-w-[160px]">
-                      {r.message ? (
-                        <span title={r.message} className="cursor-default text-muted-foreground">
-                          {r.message.length > 60 ? r.message.slice(0, 60) + '...' : r.message}
-                        </span>
-                      ) : '—'}
+                    <td className="px-4 py-3.5 text-foreground">
+                      {r.attending
+                        ? `${r.adults_count} NL${r.children_count > 0 ? ` + ${r.children_count} TE` : ''}`
+                        : '—'}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      <span title={new Date(r.created_at).toLocaleString('vi-VN')}>
-                        {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: vi })}
-                      </span>
+                    <td className="max-w-[260px] truncate px-4 py-3.5 italic text-muted-foreground">
+                      {r.message ? `“${r.message}”` : '—'}
+                    </td>
+                    <td className="px-4 py-3.5 whitespace-nowrap text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(r.created_at), {
+                        addSuffix: true,
+                        locale: vi,
+                      })}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatusPill attending={r.attending} />
                     </td>
                   </tr>
                 ))}
@@ -197,40 +238,38 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
             </table>
           </div>
 
-          {/* Mobile cards */}
           <div className="space-y-3 md:hidden">
             {filtered.map((r) => (
               <div key={r.id} className="rounded-xl border border-border bg-card p-4">
                 <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="font-semibold text-foreground">{r.name}</p>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                    r.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
-                  }`}>
-                    {r.attending ? 'Tham dự' : 'Không tham dự'}
-                  </span>
+                  <div>
+                    <p className="font-medium text-foreground">{r.name}</p>
+                    {r.phone && (
+                      <p className="font-mono text-xs text-muted-foreground">{r.phone}</p>
+                    )}
+                  </div>
+                  <StatusPill attending={r.attending} />
                 </div>
 
                 <div className="space-y-1 text-sm text-muted-foreground">
-                  {r.phone && <p>📱 {r.phone}</p>}
-                  {r.email && <p>✉️ {r.email}</p>}
                   {r.attending && (
                     <p>
-                      👥 {r.adults_count} người lớn
+                      {r.adults_count} người lớn
                       {r.children_count > 0 && ` · ${r.children_count} trẻ em`}
                     </p>
                   )}
                   {r.message && (
-                    <p title={r.message} className="cursor-default">
-                      💬 {r.message.length > 100 ? r.message.slice(0, 100) + '...' : r.message}
+                    <p className="italic">
+                      “{r.message.length > 100 ? r.message.slice(0, 100) + '…' : r.message}”
                     </p>
                   )}
                 </div>
 
-                <p
-                  className="mt-2 text-xs text-muted-foreground/70"
-                  title={new Date(r.created_at).toLocaleString('vi-VN')}
-                >
-                  {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: vi })}
+                <p className="mt-2 text-xs text-muted-foreground/70">
+                  {formatDistanceToNow(new Date(r.created_at), {
+                    addSuffix: true,
+                    locale: vi,
+                  })}
                 </p>
               </div>
             ))}
@@ -238,5 +277,21 @@ export function RsvpClient({ rsvps, invitationId, publicUrl }: RsvpClientProps) 
         </>
       )}
     </div>
+  );
+}
+
+function StatusPill({ attending }: { attending: boolean }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+        attending
+          ? 'bg-[var(--chart-1)]/20 text-[var(--chart-1)]'
+          : 'bg-destructive/10 text-destructive'
+      )}
+    >
+      {attending ? <Check className="size-3" /> : <X className="size-3" />}
+      {attending ? 'Tham dự' : 'Vắng'}
+    </span>
   );
 }

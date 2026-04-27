@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter, Dancing_Script, Lora } from "next/font/google";
+import { Cormorant_Garamond, Inter, Dancing_Script, Lora, Allura } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -31,6 +31,13 @@ const lora = Lora({
   display: "swap",
 });
 
+const allura = Allura({
+  variable: "--font-allura-variable",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Thiệp — Thiệp cưới online đẹp",
   description:
@@ -45,7 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${cormorant.variable} ${inter.variable} ${dancingScript.variable} ${lora.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${inter.variable} ${dancingScript.variable} ${lora.variable} ${allura.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

@@ -28,6 +28,21 @@ export async function createInvitationFromTemplate(templateId: string) {
   const MAX_ATTEMPTS = 3
   let lastError: string | null = null
 
+  // Read template_style from template config so the invitation renders the right component
+  const { data: templateRow } = await supabase
+    .from('templates')
+    .select('config')
+    .eq('id', templateId)
+    .single()
+
+  const templateStyle =
+    templateRow?.config &&
+    typeof templateRow.config === 'object' &&
+    !Array.isArray(templateRow.config) &&
+    typeof (templateRow.config as Record<string, unknown>).template_style === 'string'
+      ? (templateRow.config as Record<string, unknown>).template_style as string
+      : null
+
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const slug = generateInitialSlug()
 
@@ -39,6 +54,7 @@ export async function createInvitationFromTemplate(templateId: string) {
         slug,
         status: 'draft',
         tier: 'free',
+        ...(templateStyle ? { template_style: templateStyle } : {}),
       })
       .select('id')
       .single()
@@ -55,7 +71,8 @@ export async function createInvitationFromTemplate(templateId: string) {
     }
 
     // Any other DB error — don't retry
-    return { error: 'Không thể tạo thiệp. Vui lòng thử lại.' }
+    console.error('[createInvitationFromTemplate] insert error:', error)
+    return { error: `Không thể tạo thiệp: ${error?.message ?? 'unknown'} (code: ${error?.code})` }
   }
 
   return { error: lastError ?? 'Không thể tạo thiệp. Vui lòng thử lại.' }

@@ -2,8 +2,9 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeftIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardHeader } from '../../_components/dashboard-header';
 import { StatsCards } from './_components/stats-cards';
 import { RsvpClient } from './_components/rsvp-client';
 
@@ -15,7 +16,9 @@ export default async function RsvpDashboardPage({
   const { invitationId } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/sign-in');
 
   const [invResult, rsvpResult] = await Promise.all([
@@ -37,41 +40,49 @@ export default async function RsvpDashboardPage({
   const inv = invResult.data;
   const rsvps = rsvpResult.data ?? [];
 
-  // Compute stats server-side
   const totalRsvps = rsvps.length;
   const attendingCount = rsvps.filter((r) => r.attending).length;
   const notAttendingCount = totalRsvps - attendingCount;
   const totalAdults = rsvps.filter((r) => r.attending).reduce((s, r) => s + r.adults_count, 0);
-  const totalChildren = rsvps.filter((r) => r.attending).reduce((s, r) => s + r.children_count, 0);
+  const totalChildren = rsvps
+    .filter((r) => r.attending)
+    .reduce((s, r) => s + r.children_count, 0);
   const totalGuests = totalAdults + totalChildren;
   const attendanceRate = totalRsvps > 0 ? (attendingCount / totalRsvps) * 100 : 0;
 
   const coupleName =
-    [inv.bride_name, inv.groom_name].filter(Boolean).join(' & ') || 'Chưa đặt tên';
+    [inv.groom_name, inv.bride_name].filter(Boolean).join(' & ') || 'Chưa đặt tên';
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
   const publicUrl = `${appUrl}/i/${inv.slug}`;
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <header className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
+    <div className="min-h-screen bg-background">
+      <DashboardHeader email={user.email ?? ''} />
+
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
+        <nav className="mb-5 flex items-center gap-2 text-sm text-muted-foreground">
           <Link
             href="/dashboard"
-            className="flex items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Quay lại dashboard"
+            className="inline-flex items-center gap-1 hover:text-foreground"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeft className="size-3.5" /> Dashboard
           </Link>
-          <div>
-            <h1 className="font-serif text-xl font-medium text-foreground">{coupleName}</h1>
-            <p className="text-sm text-muted-foreground">Danh sách RSVP</p>
-          </div>
-        </div>
-      </header>
+          <span>/</span>
+          <span>{coupleName}</span>
+          <span>/</span>
+          <span className="text-foreground">RSVP</span>
+        </nav>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+        <div className="mb-7">
+          <h1 className="font-serif text-3xl font-normal tracking-tight md:text-4xl">
+            Danh sách khách mời
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Theo dõi RSVP và quản lý khách
+          </p>
+        </div>
+
         <StatsCards
           totalRsvps={totalRsvps}
           attendingCount={attendingCount}
@@ -80,11 +91,9 @@ export default async function RsvpDashboardPage({
           attendanceRate={attendanceRate}
         />
 
-        <RsvpClient
-          rsvps={rsvps}
-          invitationId={invitationId}
-          publicUrl={publicUrl}
-        />
+        <div className="mt-8">
+          <RsvpClient rsvps={rsvps} invitationId={invitationId} publicUrl={publicUrl} />
+        </div>
       </main>
     </div>
   );

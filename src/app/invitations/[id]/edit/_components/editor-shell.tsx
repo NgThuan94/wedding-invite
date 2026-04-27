@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { ArrowLeftIcon, CopyIcon, ExternalLinkIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { ArrowLeft, Copy, Eye, ExternalLink, Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '@/components/ui/accordion';
 import {
   Dialog,
   DialogContent,
@@ -18,44 +18,40 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { useAutoSave } from '@/lib/hooks/use-autosave'
-import { useStorageUpload } from '@/lib/hooks/use-storage-upload'
-import { updateInvitationBasicInfo } from '@/lib/actions/invitations'
-import type { Tables } from '@/types/database'
-import { SaveIndicator } from './save-indicator'
-import { SectionBasicInfo } from './section-basic-info'
-import { SectionVenue } from './section-venue'
-import { SectionStory } from './section-story'
-import { SectionTimeline } from './section-timeline'
-import { SectionParty } from './section-party'
-import { SectionSettings } from './section-settings'
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useAutoSave } from '@/lib/hooks/use-autosave';
+import { useStorageUpload } from '@/lib/hooks/use-storage-upload';
+import { updateInvitationBasicInfo } from '@/lib/actions/invitations';
+import type { Tables } from '@/types/database';
+import { SaveIndicator } from './save-indicator';
+import { SectionBasicInfo } from './section-basic-info';
+import { SectionVenue } from './section-venue';
+import { SectionStory } from './section-story';
+import { SectionTimeline } from './section-timeline';
+import { SectionParty } from './section-party';
+import { SectionSettings } from './section-settings';
 
 export type FlatFields = {
-  bride_name: string
-  groom_name: string
-  bride_full_name: string
-  groom_full_name: string
-  wedding_date: string | null
-  wedding_time: string
-  hashtag: string
-  venue_name: string
-  venue_address: string
-  venue_map_url: string
-  dress_code: string
-  story: string
-  live_stream_url: string
-  music_enabled: boolean
-  music_platform: string
-  music_url: string
-  music_autoplay: boolean
-  template_style: string
-}
+  bride_name: string;
+  groom_name: string;
+  bride_full_name: string;
+  groom_full_name: string;
+  wedding_date: string | null;
+  wedding_time: string;
+  hashtag: string;
+  venue_name: string;
+  venue_address: string;
+  venue_map_url: string;
+  dress_code: string;
+  story: string;
+  live_stream_url: string;
+  music_enabled: boolean;
+  music_platform: string;
+  music_url: string;
+  music_autoplay: boolean;
+  template_style: string;
+};
 
 function initFlatFields(inv: Tables<'invitations'>): FlatFields {
   return {
@@ -77,40 +73,30 @@ function initFlatFields(inv: Tables<'invitations'>): FlatFields {
     music_url: inv.music_url ?? '',
     music_autoplay: inv.music_autoplay ?? true,
     template_style: inv.template_style ?? 'elegant',
-  }
+  };
 }
-
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
 
 interface EditorShellProps {
-  invitation: Tables<'invitations'>
-  timeline: Tables<'love_timeline'>[]
-  party: Tables<'wedding_party'>[]
+  invitation: Tables<'invitations'>;
+  timeline: Tables<'love_timeline'>[];
+  party: Tables<'wedding_party'>[];
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
-  const router = useRouter()
+  const router = useRouter();
   const { uploadFile } = useStorageUpload({
     userId: invitation.user_id,
     invitationId: invitation.id,
-  })
-  const [flatFields, setFlatFields] = useState<FlatFields>(() =>
-    initFlatFields(invitation)
-  )
-  const [timelineDirty, setTimelineDirty] = useState(false)
-  const [partyDirty, setPartyDirty] = useState(false)
-  const [slugDirty, setSlugDirty] = useState(false)
-  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false)
-  const [publishedSlug, setPublishedSlug] = useState<string | null>(null)
-  const [status, setStatus] = useState(invitation.status)
+  });
+  const [flatFields, setFlatFields] = useState<FlatFields>(() => initFlatFields(invitation));
+  const [timelineDirty, setTimelineDirty] = useState(false);
+  const [partyDirty, setPartyDirty] = useState(false);
+  const [slugDirty, setSlugDirty] = useState(false);
+  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false);
+  const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
+  const [status, setStatus] = useState(invitation.status);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
 
   const saveFn = useCallback(
     async (fields: FlatFields) => {
@@ -133,16 +119,16 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         music_url: fields.music_url || null,
         music_autoplay: fields.music_autoplay,
         template_style: fields.template_style || 'elegant',
-      })
+      });
       if (result.error) {
-        toast.error('Không thể lưu, thử lại', { description: result.error })
+        toast.error('Không thể lưu, thử lại', { description: result.error });
       }
-      return result
+      return result;
     },
     [invitation.id]
-  )
+  );
 
-  const { status: autoSaveStatus } = useAutoSave(flatFields, saveFn, { delay: 2000 })
+  const { status: autoSaveStatus } = useAutoSave(flatFields, saveFn, { delay: 2000 });
 
   const hasUnsavedChanges =
     autoSaveStatus === 'pending' ||
@@ -150,76 +136,100 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
     autoSaveStatus === 'error' ||
     timelineDirty ||
     partyDirty ||
-    slugDirty
+    slugDirty;
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (!hasUnsavedChanges) return
-      e.preventDefault()
-      e.returnValue = ''
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [hasUnsavedChanges])
+      if (!hasUnsavedChanges) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasUnsavedChanges]);
 
   function handleFieldChange(patch: Partial<FlatFields>) {
-    setFlatFields((prev) => ({ ...prev, ...patch }))
+    setFlatFields((prev) => ({ ...prev, ...patch }));
   }
 
   function handleBack() {
     if (hasUnsavedChanges) {
-      setConfirmLeaveOpen(true)
+      setConfirmLeaveOpen(true);
     } else {
-      router.push('/dashboard')
+      router.push('/dashboard');
     }
   }
 
   function handlePublishSuccess(slug: string) {
-    setStatus('published')
-    setPublishedSlug(slug)
+    setStatus('published');
+    setPublishedSlug(slug);
   }
 
   function copyPublicUrl() {
-    const url = `${appUrl}/i/${publishedSlug}`
+    const url = `${appUrl}/i/${publishedSlug}`;
     navigator.clipboard.writeText(url).then(() => {
-      toast.success('Đã sao chép link!')
-    })
+      toast.success('Đã sao chép link!');
+    });
   }
 
   const displayName =
     flatFields.bride_name && flatFields.groom_name
-      ? `${flatFields.bride_name} & ${flatFields.groom_name}`
-      : flatFields.bride_name || flatFields.groom_name || 'Chưa đặt tên'
+      ? `${flatFields.groom_name} & ${flatFields.bride_name}`
+      : flatFields.bride_name || flatFields.groom_name || 'Chưa đặt tên';
 
-  const publicUrl = publishedSlug ? `${appUrl}/i/${publishedSlug}` : ''
+  const slugUrl = invitation.slug ? `thiep.vn/i/${invitation.slug}` : 'Chưa có slug';
+  const publicUrl = publishedSlug ? `${appUrl}/i/${publishedSlug}` : '';
+  const isPublished = status === 'published';
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon-sm" onClick={handleBack} aria-label="Quay lại">
-            <ArrowLeftIcon className="h-4 w-4" />
-          </Button>
+      <header className="sticky top-0 z-20 border-b border-border bg-card">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:gap-4 md:px-8">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Dashboard</span>
+          </button>
 
-          <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-            <h1 className="truncate font-serif text-xl md:text-2xl font-medium leading-snug">
+          <div className="hidden h-5 w-px bg-border sm:block" aria-hidden />
+
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-serif text-base font-medium leading-tight md:text-lg">
               {displayName}
-            </h1>
-            <p className="text-sm text-muted-foreground">Chỉnh sửa thiệp cưới</p>
+            </div>
+            <div className="truncate font-mono text-[11px] text-muted-foreground">{slugUrl}</div>
           </div>
 
           <SaveIndicator status={autoSaveStatus} />
+
+          {isPublished && invitation.slug && (
+            <a
+              href={`/i/${invitation.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted sm:inline-flex"
+            >
+              <Eye className="size-3.5" /> Xem trước
+            </a>
+          )}
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="mx-auto max-w-3xl px-4 py-6">
+      <main className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-10">
+        <div className="mb-6 md:mb-8">
+          <h1 className="font-serif text-3xl font-normal tracking-tight md:text-4xl">
+            Chỉnh sửa thiệp cưới
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Thay đổi sẽ tự động lưu sau vài giây.
+          </p>
+        </div>
+
         <Accordion multiple defaultValue={['basic', 'venue', 'story']}>
           <AccordionItem value="basic">
-            <AccordionTrigger className="text-base font-medium">
-              Thông tin cơ bản
-            </AccordionTrigger>
+            <AccordionTrigger className="text-base font-medium">Thông tin cơ bản</AccordionTrigger>
             <AccordionContent>
               <SectionBasicInfo
                 fields={flatFields}
@@ -238,27 +248,21 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
           </AccordionItem>
 
           <AccordionItem value="venue">
-            <AccordionTrigger className="text-base font-medium">
-              Địa điểm
-            </AccordionTrigger>
+            <AccordionTrigger className="text-base font-medium">Địa điểm</AccordionTrigger>
             <AccordionContent>
               <SectionVenue fields={flatFields} onChange={handleFieldChange} />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="story">
-            <AccordionTrigger className="text-base font-medium">
-              Chuyện tình
-            </AccordionTrigger>
+            <AccordionTrigger className="text-base font-medium">Chuyện tình</AccordionTrigger>
             <AccordionContent>
               <SectionStory fields={flatFields} onChange={handleFieldChange} />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="timeline">
-            <AccordionTrigger className="text-base font-medium">
-              Các mốc tình yêu
-            </AccordionTrigger>
+            <AccordionTrigger className="text-base font-medium">Các mốc tình yêu</AccordionTrigger>
             <AccordionContent>
               <SectionTimeline
                 invitationId={invitation.id}
@@ -270,9 +274,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
           </AccordionItem>
 
           <AccordionItem value="party">
-            <AccordionTrigger className="text-base font-medium">
-              Wedding party
-            </AccordionTrigger>
+            <AccordionTrigger className="text-base font-medium">Đoàn cưới</AccordionTrigger>
             <AccordionContent>
               <SectionParty
                 invitationId={invitation.id}
@@ -285,7 +287,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
 
           <AccordionItem value="settings">
             <AccordionTrigger className="text-base font-medium">
-              Cài đặt & Xuất bản
+              Cài đặt &amp; Xuất bản
             </AccordionTrigger>
             <AccordionContent>
               <SectionSettings
@@ -303,7 +305,6 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         </Accordion>
       </main>
 
-      {/* Confirm leave dialog */}
       <Dialog open={confirmLeaveOpen} onOpenChange={setConfirmLeaveOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
@@ -323,11 +324,18 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Publish success dialog */}
-      <Dialog open={publishedSlug !== null} onOpenChange={(open) => { if (!open) setPublishedSlug(null) }}>
+      <Dialog
+        open={publishedSlug !== null}
+        onOpenChange={(open) => {
+          if (!open) setPublishedSlug(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-xl">🎉 Đã xuất bản thiệp cưới!</DialogTitle>
+            <DialogTitle className="text-xl">
+              <Share2 className="mr-2 inline size-5 text-accent" />
+              Đã xuất bản thiệp cưới
+            </DialogTitle>
             <DialogDescription>
               Thiệp của bạn đã được công khai. Chia sẻ link dưới đây với khách mời.
             </DialogDescription>
@@ -341,7 +349,7 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
               onFocus={(e) => e.target.select()}
             />
             <Button variant="outline" size="icon" onClick={copyPublicUrl} aria-label="Sao chép">
-              <CopyIcon className="h-4 w-4" />
+              <Copy className="size-4" />
             </Button>
           </div>
 
@@ -353,14 +361,14 @@ export function EditorShell({ invitation, timeline, party }: EditorShellProps) {
               href={publicUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              <ExternalLinkIcon className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 size-4" />
               Xem thiệp
             </a>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -5,7 +5,13 @@
       "Bash(pnpm dev:*)",
       "Bash(pnpm add:*)",
       "Bash(pnpm install:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "WebFetch(domain:chungdoi.com)",
+      "Bash(gh repo *)",
+      "Read(//Users/terri_k/.claude/**)",
+      "Read(//Users/terri_k/.claude/skills/**)"
     ]
   }
 }

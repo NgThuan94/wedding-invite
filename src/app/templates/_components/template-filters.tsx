@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { cn } from '@/lib/utils'
+import { useRouter, useSearchParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
   { value: 'all', label: 'Tất cả' },
-  { value: 'vintage', label: 'Vintage' },
-  { value: 'minimalist', label: 'Minimalist' },
-  { value: 'y2k', label: 'Y2K' },
-  { value: 'watercolor', label: 'Watercolor' },
-  { value: 'cinematic', label: 'Cinematic' },
-]
+  { value: 'minimalist', label: 'Tối giản' },
+  { value: 'romantic', label: 'Lãng mạn' },
+  { value: 'vintage', label: 'Cổ điển' },
+  { value: 'traditional', label: 'Truyền thống' },
+  { value: 'floral', label: 'Hoa lá' },
+];
 
 const TIERS = [
   { value: 'all', label: 'Tất cả' },
@@ -18,64 +18,73 @@ const TIERS = [
   { value: 'standard', label: 'Standard' },
   { value: 'premium', label: 'Premium' },
   { value: 'vip', label: 'VIP' },
-]
+];
 
 interface TemplateFiltersProps {
-  currentCategory: string
-  currentTier: string
+  currentCategory: string;
+  currentTier: string;
 }
 
 export function TemplateFilters({ currentCategory, currentTier }: TemplateFiltersProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   function setFilter(key: 'category' | 'tier', value: string) {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (value === 'all') {
-      params.delete(key)
+      params.delete(key);
     } else {
-      params.set(key, value)
+      params.set(key, value);
     }
-    router.push(`/templates?${params.toString()}`)
+    router.push(`/templates?${params.toString()}`);
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Category */}
-      <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.value}
-            onClick={() => setFilter('category', c.value)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-sm transition-colors',
-              currentCategory === c.value
-                ? 'border-foreground bg-foreground text-background'
-                : 'border-border bg-background text-muted-foreground hover:border-foreground/50 hover:text-foreground'
-            )}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col gap-4">
+      <FilterRow
+        label="Phong cách"
+        items={CATEGORIES}
+        active={currentCategory}
+        onSelect={(v) => setFilter('category', v)}
+      />
+      <FilterRow
+        label="Gói"
+        items={TIERS}
+        active={currentTier}
+        onSelect={(v) => setFilter('tier', v)}
+      />
+    </div>
+  );
+}
 
-      {/* Tier */}
+interface FilterRowProps {
+  label: string;
+  items: ReadonlyArray<{ value: string; label: string }>;
+  active: string;
+  onSelect: (value: string) => void;
+}
+
+function FilterRow({ label, items, active, onSelect }: FilterRowProps) {
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+      <span className="w-20 shrink-0 text-xs text-muted-foreground">{label}</span>
       <div className="flex flex-wrap gap-2">
-        {TIERS.map((t) => (
+        {items.map((item) => (
           <button
-            key={t.value}
-            onClick={() => setFilter('tier', t.value)}
+            key={item.value}
+            type="button"
+            onClick={() => onSelect(item.value)}
             className={cn(
-              'rounded-full border px-3 py-1 text-sm transition-colors',
-              currentTier === t.value
-                ? 'border-foreground bg-foreground text-background'
-                : 'border-border bg-background text-muted-foreground hover:border-foreground/50 hover:text-foreground'
+              'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+              active === item.value
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-foreground hover:border-foreground/40'
             )}
           >
-            {t.label}
+            {item.label}
           </button>
         ))}
       </div>
     </div>
-  )
+  );
 }
